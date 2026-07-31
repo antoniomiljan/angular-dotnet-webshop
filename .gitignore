@@ -12,3 +12,5 @@ ClientApp/.angular/
 .vscode/
 *.user
 .DS_Store
+dotnet-install.sh
+*.gpg
