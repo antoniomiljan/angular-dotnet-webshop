@@ -4,6 +4,7 @@ using AutoMapper;
 using Api.Data;
 using Api.Models;
 using Api.DTOs;
+using Microsoft.AspNetCore.Authorization;
 
 namespace Api.Controllers;
 
@@ -40,6 +41,7 @@ public class CategoriesController : ControllerBase
     }
 
     // POST: api/categories
+    [Authorize(Roles = "Admin")]
     [HttpPost]
     public async Task<ActionResult<CategoryDto>> CreateCategory(CreateCategoryDto dto)
     {

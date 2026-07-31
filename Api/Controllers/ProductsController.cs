@@ -4,6 +4,7 @@ using AutoMapper;
 using Api.Data;
 using Api.Models;
 using Api.DTOs;
+using Microsoft.AspNetCore.Authorization;
 
 namespace Api.Controllers;
 
@@ -56,6 +57,7 @@ public class ProductsController : ControllerBase
     }
 
     // POST: api/products
+    [Authorize(Roles = "Admin")]
     [HttpPost]
     public async Task<ActionResult<ProductDto>> CreateProduct(CreateProductDto dto)
     {
@@ -74,6 +76,7 @@ public class ProductsController : ControllerBase
     }
 
     // PUT: api/products/5
+    [Authorize(Roles = "Admin")]
     [HttpPut("{id}")]
     public async Task<IActionResult> UpdateProduct(int id, UpdateProductDto dto)
     {
@@ -92,6 +95,7 @@ public class ProductsController : ControllerBase
     }
 
     // DELETE: api/products/5 (soft delete)
+    [Authorize(Roles = "Admin")]
     [HttpDelete("{id}")]
     public async Task<IActionResult> DeleteProduct(int id)
     {
