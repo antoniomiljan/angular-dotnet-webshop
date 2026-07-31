@@ -4,7 +4,7 @@ using AutoMapper;
 using Api.Data;
 using Api.Models;
 using Api.DTOs;
-
+using Microsoft.AspNetCore.Authorization;
 namespace Api.Controllers;
 
 [ApiController]
@@ -81,5 +81,33 @@ public class OrdersController : ControllerBase
             return NotFound();
 
         return Ok(_mapper.Map<OrderDto>(order));
+    }
+
+    // GET: api/orders (admin — list all orders)
+    [Authorize(Roles = "Admin")]
+    [HttpGet]
+    public async Task<ActionResult<IEnumerable<OrderDto>>> GetAllOrders()
+    {
+        var orders = await _context.Orders
+            .Include(o => o.Items).ThenInclude(i => i.Product)
+            .OrderByDescending(o => o.CreatedAt)
+            .ToListAsync();
+
+        return Ok(_mapper.Map<List<OrderDto>>(orders));
+    }
+
+    // PUT: api/orders/5/status
+    [Authorize(Roles = "Admin")]
+    [HttpPut("{id}/status")]
+    public async Task<IActionResult> UpdateOrderStatus(int id, UpdateOrderStatusDto dto)
+    {
+        var order = await _context.Orders.FindAsync(id);
+        if (order is null)
+            return NotFound();
+
+        order.Status = dto.Status;
+        await _context.SaveChangesAsync();
+
+        return NoContent();
     }
 }

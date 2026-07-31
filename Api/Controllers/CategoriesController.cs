@@ -40,6 +40,47 @@ public class CategoriesController : ControllerBase
         return Ok(_mapper.Map<CategoryDto>(category));
     }
 
+    // PUT: api/categories/5
+    [Authorize(Roles = "Admin")]
+    [HttpPut("{id}")]
+    public async Task<IActionResult> UpdateCategory(int id, CreateCategoryDto dto)
+    {
+        var category = await _context.Categories.FindAsync(id);
+        if (category is null)
+            return NotFound();
+
+        var slugTaken = await _context.Categories
+            .AnyAsync(c => c.Slug == dto.Slug && c.Id != id);
+        if (slugTaken)
+            return BadRequest($"A category with slug '{dto.Slug}' already exists.");
+
+        category.Name = dto.Name;
+        category.Slug = dto.Slug;
+        await _context.SaveChangesAsync();
+
+        return NoContent();
+    }
+
+
+    // DELETE: api/categories/5
+    [Authorize(Roles = "Admin")]
+    [HttpDelete("{id}")]
+    public async Task<IActionResult> DeleteCategory(int id)
+    {
+        var category = await _context.Categories.FindAsync(id);
+        if (category is null)
+            return NotFound();
+
+        var hasProducts = await _context.Products.AnyAsync(p => p.CategoryId == id && p.IsActive);
+        if (hasProducts)
+            return BadRequest("Cannot delete a category that still has active products. Reassign or deactivate them first.");
+
+        _context.Categories.Remove(category);
+        await _context.SaveChangesAsync();
+
+        return NoContent();
+    }
+
     // POST: api/categories
     [Authorize(Roles = "Admin")]
     [HttpPost]
