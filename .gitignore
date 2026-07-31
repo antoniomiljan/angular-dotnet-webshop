@@ -1,0 +1,14 @@
+# .NET
+Api/bin/
+Api/obj/
+Api/appsettings.Development.json
+
+# Angular
+ClientApp/node_modules/
+ClientApp/dist/
+ClientApp/.angular/
+
+# General
+.vscode/
+*.user
+.DS_Store
