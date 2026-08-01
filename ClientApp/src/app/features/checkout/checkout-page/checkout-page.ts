@@ -20,8 +20,8 @@ import { environment } from '../../../../environments/environment';
     CommonModule, FormsModule, MatCardModule, MatButtonModule,
     MatFormFieldModule, MatInputModule, MatProgressSpinnerModule
   ],
-  templateUrl: './checkout-page.component.html',
-  styleUrl: './checkout-page.component.css'
+  templateUrl: './checkout-page.html',
+  styleUrl: './checkout-page.css'
 })
 export class CheckoutPageComponent implements OnInit, AfterViewInit {
   cartService = inject(CartService);

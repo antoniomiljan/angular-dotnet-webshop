@@ -11,8 +11,8 @@ import { CartService } from '../../../core/services/cart.service';
   selector: 'app-cart-page',
   standalone: true,
   imports: [CommonModule, RouterLink, MatCardModule, MatButtonModule, MatIconModule, FormsModule],
-  templateUrl: './cart-page.component.html',
-  styleUrl: './cart-page.component.css'
+  templateUrl: './cart-page.html',
+  styleUrl: './cart-page.css'
 })
 export class CartPageComponent {
   cartService = inject(CartService);

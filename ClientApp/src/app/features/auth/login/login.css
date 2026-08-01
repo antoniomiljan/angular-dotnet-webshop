@@ -1,0 +1,26 @@
+.auth-container {
+  display: flex;
+  justify-content: center;
+  padding: 48px 24px;
+}
+
+.auth-card {
+  padding: 32px;
+  max-width: 400px;
+  width: 100%;
+}
+
+.full-width {
+  width: 100%;
+  margin-bottom: 8px;
+}
+
+.error {
+  color: #d32f2f;
+  margin: 8px 0;
+}
+
+.switch-link {
+  text-align: center;
+  margin-top: 16px;
+}

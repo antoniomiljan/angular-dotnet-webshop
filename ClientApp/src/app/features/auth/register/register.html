@@ -1,0 +1,25 @@
+<div class="auth-container">
+  <mat-card class="auth-card">
+    <h1>Register</h1>
+
+    <mat-form-field appearance="outline" class="full-width">
+      <mat-label>Email</mat-label>
+      <input matInput type="email" [(ngModel)]="email" name="email" />
+    </mat-form-field>
+
+    <mat-form-field appearance="outline" class="full-width">
+      <mat-label>Password</mat-label>
+      <input matInput type="password" [(ngModel)]="password" name="password" (keyup.enter)="submit()" />
+    </mat-form-field>
+
+    @if (error()) {
+      <p class="error">{{ error() }}</p>
+    }
+
+    <button mat-raised-button color="primary" class="full-width" [disabled]="loading()" (click)="submit()">
+      Register
+    </button>
+
+    <p class="switch-link">Already have an account? <a routerLink="/login">Log In</a></p>
+  </mat-card>
+</div>

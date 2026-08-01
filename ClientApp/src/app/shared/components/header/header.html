@@ -3,6 +3,17 @@
 
   <span class="spacer"></span>
 
+  @if (authService.isAdmin()) {
+    <a mat-button routerLink="/admin">Admin</a>
+  }
+
+  @if (authService.currentEmail()) {
+    <span class="user-email">{{ authService.currentEmail() }}</span>
+    <button mat-button (click)="logout()">Log Out</button>
+  } @else {
+    <a mat-button routerLink="/login">Log In</a>
+  }
+
   <button mat-icon-button routerLink="/cart" aria-label="View cart">
     @if (cartService.itemCount() > 0) {
       <mat-icon [matBadge]="cartService.itemCount()" matBadgeColor="accent">

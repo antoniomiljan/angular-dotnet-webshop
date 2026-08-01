@@ -10,8 +10,8 @@ import { RouterLink } from '@angular/router';
   selector: 'app-product-list',
   standalone: true,
   imports: [CommonModule, MatCardModule, MatProgressSpinnerModule, RouterLink],
-  templateUrl: './product-list.component.html',
-  styleUrl: './product-list.component.css'
+  templateUrl: './product-list.html',
+  styleUrl: './product-list.css'
 })
 export class ProductListComponent implements OnInit {
   private productService = inject(ProductService);

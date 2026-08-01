@@ -11,8 +11,8 @@ import { Order } from '../../../shared/models/order.model';
   selector: 'app-order-confirmation',
   standalone: true,
   imports: [CommonModule, RouterLink, MatCardModule, MatIconModule, MatButtonModule],
-  templateUrl: './order-confirmation.component.html',
-  styleUrl: './order-confirmation.component.css'
+  templateUrl: './order-confirmation.html',
+  styleUrl: './order-confirmation.css'
 })
 export class OrderConfirmationComponent implements OnInit {
   private route = inject(ActivatedRoute);

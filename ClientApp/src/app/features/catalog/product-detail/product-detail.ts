@@ -12,8 +12,8 @@ import { CartService } from '../../../core/services/cart.service';
   selector: 'app-product-detail',
   standalone: true,
   imports: [CommonModule, RouterLink, MatCardModule, MatButtonModule, MatProgressSpinnerModule],
-  templateUrl: './product-detail.component.html',
-  styleUrl: './product-detail.component.css'
+  templateUrl: './product-detail.html',
+  styleUrl: './product-detail.css'
 })
 export class ProductDetailComponent implements OnInit {
   private route = inject(ActivatedRoute);
