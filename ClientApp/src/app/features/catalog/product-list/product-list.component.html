@@ -12,7 +12,7 @@
   @if (!loading() && !error()) {
     <div class="product-grid">
       @for (product of products(); track product.id) {
-        <mat-card class="product-card">
+        <mat-card class="product-card" [routerLink]="['/products', product.id]">
           <mat-card-header>
             <mat-card-title>{{ product.name }}</mat-card-title>
             <mat-card-subtitle>{{ product.categoryName }}</mat-card-subtitle>

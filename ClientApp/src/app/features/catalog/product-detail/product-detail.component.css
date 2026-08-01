@@ -1,0 +1,30 @@
+.detail-container {
+  padding: 24px;
+  max-width: 600px;
+  margin: 0 auto;
+}
+
+.back-link {
+  display: inline-block;
+  margin-bottom: 16px;
+  text-decoration: none;
+  color: #1976d2;
+}
+
+.detail-card {
+  width: 100%;
+}
+
+.price {
+  font-size: 1.5rem;
+  font-weight: 600;
+  margin-top: 12px;
+}
+
+.stock {
+  color: #666;
+}
+
+.error {
+  color: #d32f2f;
+}
