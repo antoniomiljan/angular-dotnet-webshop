@@ -1,0 +1,46 @@
+<div class="checkout-container">
+  <h1>Checkout</h1>
+
+  <mat-card class="order-summary">
+    <h3>Order Summary</h3>
+    @for (item of cartService.items(); track item.product.id) {
+      <div class="summary-line">
+        <span>{{ item.product.name }} × {{ item.quantity }}</span>
+        <span>${{ (item.product.price * item.quantity).toFixed(2) }}</span>
+      </div>
+    }
+    <div class="summary-total">
+      <strong>Total: ${{ cartService.totalPrice().toFixed(2) }}</strong>
+    </div>
+  </mat-card>
+
+  <mat-card class="checkout-form">
+    <mat-form-field appearance="outline" class="full-width">
+      <mat-label>Email</mat-label>
+      <input matInput type="email" [(ngModel)]="email" placeholder="you@example.com" required />
+    </mat-form-field>
+
+    <div class="card-element-wrapper">
+      <label>Card details</label>
+      <div #cardElement class="card-element"></div>
+    </div>
+
+    @if (error()) {
+      <p class="error">{{ error() }}</p>
+    }
+
+    <button
+      mat-raised-button
+      color="primary"
+      [disabled]="loading() || !cardReady() || !email()"
+      (click)="submitPayment()"
+      class="pay-button"
+    >
+      @if (loading()) {
+        <mat-spinner diameter="20"></mat-spinner>
+      } @else {
+        Pay ${{ cartService.totalPrice().toFixed(2) }}
+      }
+    </button>
+  </mat-card>
+</div>

@@ -1,0 +1,35 @@
+<div class="confirmation-container">
+  @if (loading()) {
+    <p>Loading...</p>
+  }
+
+  @if (error()) {
+    <p class="error">{{ error() }}</p>
+  }
+
+  @if (order(); as o) {
+    <mat-card class="confirmation-card">
+      <mat-icon class="success-icon">check_circle</mat-icon>
+      <h1>Order Confirmed!</h1>
+      <p>Thank you for your order. A confirmation was sent to {{ o.guestEmail }}.</p>
+
+      <div class="order-details">
+        <p><strong>Order #{{ o.id }}</strong></p>
+        <p>Status: {{ o.status }}</p>
+
+        @for (item of o.items; track item.productId) {
+          <div class="item-line">
+            <span>{{ item.productName }} × {{ item.quantity }}</span>
+            <span>${{ (item.unitPriceAtPurchase * item.quantity).toFixed(2) }}</span>
+          </div>
+        }
+
+        <div class="total-line">
+          <strong>Total: ${{ o.totalAmount.toFixed(2) }}</strong>
+        </div>
+      </div>
+
+      <a mat-raised-button color="primary" routerLink="/">Continue Shopping</a>
+    </mat-card>
+  }
+</div>

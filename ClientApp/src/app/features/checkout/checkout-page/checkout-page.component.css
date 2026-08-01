@@ -1,0 +1,54 @@
+.checkout-container {
+  padding: 24px;
+  max-width: 500px;
+  margin: 0 auto;
+}
+
+.order-summary, .checkout-form {
+  padding: 16px;
+  margin-bottom: 16px;
+}
+
+.summary-line {
+  display: flex;
+  justify-content: space-between;
+  padding: 4px 0;
+}
+
+.summary-total {
+  margin-top: 12px;
+  padding-top: 12px;
+  border-top: 1px solid #ddd;
+  text-align: right;
+}
+
+.full-width {
+  width: 100%;
+}
+
+.card-element-wrapper {
+  margin: 16px 0;
+}
+
+.card-element-wrapper label {
+  display: block;
+  margin-bottom: 8px;
+  font-size: 0.875rem;
+  color: #666;
+}
+
+.card-element {
+  padding: 12px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+}
+
+.pay-button {
+  width: 100%;
+  height: 44px;
+}
+
+.error {
+  color: #d32f2f;
+  margin: 8px 0;
+}
