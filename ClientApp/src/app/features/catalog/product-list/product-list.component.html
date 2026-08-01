@@ -1,0 +1,31 @@
+<div class="product-grid-container">
+  <h1>Products</h1>
+
+  @if (loading()) {
+    <mat-spinner></mat-spinner>
+  }
+
+  @if (error()) {
+    <p class="error">{{ error() }}</p>
+  }
+
+  @if (!loading() && !error()) {
+    <div class="product-grid">
+      @for (product of products(); track product.id) {
+        <mat-card class="product-card">
+          <mat-card-header>
+            <mat-card-title>{{ product.name }}</mat-card-title>
+            <mat-card-subtitle>{{ product.categoryName }}</mat-card-subtitle>
+          </mat-card-header>
+          <mat-card-content>
+            <p>{{ product.description }}</p>
+            <p class="price">${{ product.price.toFixed(2) }}</p>
+            <p class="stock">{{ product.stock }} in stock</p>
+          </mat-card-content>
+        </mat-card>
+      } @empty {
+        <p>No products found.</p>
+      }
+    </div>
+  }
+</div>
