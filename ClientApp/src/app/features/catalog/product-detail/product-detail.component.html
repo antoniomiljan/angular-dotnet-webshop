@@ -22,8 +22,8 @@
         <p class="stock">{{ p.stock }} in stock</p>
       </mat-card-content>
       <mat-card-actions>
-        <button mat-raised-button color="primary" [disabled]="p.stock === 0">
-          Add to Cart
+        <button mat-raised-button color="primary" [disabled]="p.stock === 0" (click)="addToCart(p)">
+        Add to Cart
         </button>
       </mat-card-actions>
     </mat-card>

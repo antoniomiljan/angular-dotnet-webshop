@@ -6,6 +6,7 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { ProductService } from '../../../core/services/product.service';
 import { Product } from '../../../shared/models/product.model';
+import { CartService } from '../../../core/services/cart.service';
 
 @Component({
   selector: 'app-product-detail',
@@ -17,6 +18,7 @@ import { Product } from '../../../shared/models/product.model';
 export class ProductDetailComponent implements OnInit {
   private route = inject(ActivatedRoute);
   private productService = inject(ProductService);
+  private cartService = inject(CartService);
 
   product = signal<Product | null>(null);
   loading = signal(true);
@@ -43,4 +45,8 @@ export class ProductDetailComponent implements OnInit {
       }
     });
   }
+
+  addToCart(product: Product): void {
+    this.cartService.addItem(product);
+}
 }
