@@ -1,0 +1,15 @@
+<mat-toolbar color="primary" class="header-toolbar">
+  <a routerLink="/" class="brand">My Webshop</a>
+
+  <span class="spacer"></span>
+
+  <button mat-icon-button routerLink="/cart" aria-label="View cart">
+    @if (cartService.itemCount() > 0) {
+      <mat-icon [matBadge]="cartService.itemCount()" matBadgeColor="accent">
+        shopping_cart
+      </mat-icon>
+    } @else {
+      <mat-icon>shopping_cart</mat-icon>
+    }
+  </button>
+</mat-toolbar>

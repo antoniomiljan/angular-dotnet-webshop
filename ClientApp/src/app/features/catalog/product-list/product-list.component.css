@@ -29,3 +29,14 @@
 .error {
   color: #d32f2f;
 }
+
+.page-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.cart-link {
+  text-decoration: none;
+  font-size: 1.1rem;
+}
