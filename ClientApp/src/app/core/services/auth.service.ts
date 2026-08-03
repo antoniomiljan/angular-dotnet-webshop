@@ -9,7 +9,7 @@ const TOKEN_KEY = 'webshop_token';
 interface DecodedToken {
   sub: string;
   email: string;
-  role?: string | string[];
+  'http://schemas.microsoft.com/ws/2008/06/identity/claims/role'?: string | string[];
   exp: number;
 }
 
@@ -52,8 +52,9 @@ export class AuthService {
   private checkIsAdmin(token: string): boolean {
     try {
       const decoded = jwtDecode<DecodedToken>(token);
-      if (!decoded.role) return false;
-      return Array.isArray(decoded.role) ? decoded.role.includes('Admin') : decoded.role === 'Admin';
+      const role = decoded['http://schemas.microsoft.com/ws/2008/06/identity/claims/role'];
+      if (!role) return false;
+      return Array.isArray(role) ? role.includes('Admin') : role === 'Admin';
     } catch {
       return false;
     }

@@ -14,3 +14,4 @@ ClientApp/.angular/
 .DS_Store
 dotnet-install.sh
 *.gpg
+TODO.md

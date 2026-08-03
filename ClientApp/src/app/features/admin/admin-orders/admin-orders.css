@@ -1,0 +1,22 @@
+.admin-container {
+  padding: 24px;
+  max-width: 1000px;
+  margin: 0 auto;
+}
+
+.status-select {
+  width: 140px;
+}
+
+.error {
+  color: #d32f2f;
+  margin-bottom: 16px;
+}
+
+.full-width {
+  width: 100%;
+}
+
+.cancelled-option {
+  color: #d32f2f;
+}
