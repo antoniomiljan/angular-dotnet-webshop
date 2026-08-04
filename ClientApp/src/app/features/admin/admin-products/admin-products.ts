@@ -43,13 +43,25 @@ export class AdminProducts implements OnInit {
     categoryId: 0
   };
 
+  loading = signal(true);
+
   ngOnInit(): void {
     this.loadProducts();
     this.categoryService.getCategories().subscribe(data => this.categories.set(data));
   }
 
   loadProducts(): void {
-    this.productService.getProducts().subscribe(data => this.products.set(data));
+    this.loading.set(true);
+    this.productService.getProducts().subscribe({
+      next: (data) => {
+        this.products.set(data);
+        this.loading.set(false);
+      },
+      error: () => {
+        this.error.set('Failed to load products.');
+        this.loading.set(false);
+      }
+    });
   }
 
   startEdit(product: Product): void {
