@@ -82,7 +82,7 @@ export class CheckoutPageComponent implements OnInit, AfterViewInit {
       if (!order) throw new Error('Order creation failed.');
 
       // Step 2: create the PaymentIntent
-      const intentResponse = await this.paymentService.createPaymentIntent(order.id).toPromise();
+      const intentResponse = await this.paymentService.createPaymentIntent(order.id, order.accessToken).toPromise();
       if (!intentResponse) throw new Error('Payment setup failed.');
 
       // Step 3: confirm payment with Stripe

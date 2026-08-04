@@ -12,7 +12,7 @@ export class PaymentService {
   private http = inject(HttpClient);
   private baseUrl = `${environment.apiUrl}/payments`;
 
-  createPaymentIntent(orderId: number): Observable<CreateIntentResponse> {
-    return this.http.post<CreateIntentResponse>(`${this.baseUrl}/create-intent/${orderId}`, {});
+  createPaymentIntent(orderId: number, token: string): Observable<CreateIntentResponse> {
+    return this.http.post<CreateIntentResponse>(`${this.baseUrl}/create-intent/${orderId}`, {}, { params: { token } });
   }
 }

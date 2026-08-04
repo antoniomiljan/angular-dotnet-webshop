@@ -16,14 +16,12 @@ public class PaymentsController : ControllerBase
         _context = context;
     }
 
-    // POST: api/payments/create-intent/5
-    // No ownership check against the order's access token: any caller who knows or
-    // guesses an order id can create a PaymentIntent for it.
+    // POST: api/payments/create-intent/5?token=...
     [HttpPost("create-intent/{orderId}")]
-    public async Task<IActionResult> CreatePaymentIntent(int orderId)
+    public async Task<IActionResult> CreatePaymentIntent(int orderId, [FromQuery] Guid token)
     {
         var order = await _context.Orders.FindAsync(orderId);
-        if (order is null)
+        if (order is null || order.AccessToken != token)
             return NotFound();
 
         if (order.Status != Models.OrderStatus.Pending)
