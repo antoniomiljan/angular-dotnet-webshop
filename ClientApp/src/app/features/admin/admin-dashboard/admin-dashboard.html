@@ -82,4 +82,12 @@
       <p>View and update order status</p>
     </mat-card>
   </div>
+
+  @if (!isProduction) {
+    <mat-card class="debug-section">
+      <h3>Debug</h3>
+      <p>Deletes all orders and order items so revenue/order stats start clean. Products and categories are untouched.</p>
+      <button mat-stroked-button color="warn" (click)="resetOrders()">Reset Test Orders</button>
+    </mat-card>
+  }
 </div>

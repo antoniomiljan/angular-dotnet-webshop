@@ -93,3 +93,19 @@
 .admin-link-card:hover {
   box-shadow: 0 4px 12px rgba(0,0,0,0.15);
 }
+
+.debug-section {
+  margin-top: 24px;
+  padding: 16px 20px;
+  border: 1px dashed var(--mat-sys-error);
+}
+
+.debug-section h3 {
+  margin-top: 0;
+  color: var(--mat-sys-error);
+}
+
+.debug-section p {
+  color: var(--mat-sys-on-surface-variant);
+  font-size: 0.875rem;
+}

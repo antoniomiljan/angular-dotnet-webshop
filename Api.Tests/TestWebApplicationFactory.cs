@@ -19,11 +19,17 @@ namespace Api.Tests;
 // inside ConfigureServices, before the real host finishes building.
 public class TestWebApplicationFactory : WebApplicationFactory<Program>
 {
+    private readonly string _environmentName;
     private SqliteConnection? _connection;
+
+    public TestWebApplicationFactory(string environmentName = "Testing")
+    {
+        _environmentName = environmentName;
+    }
 
     protected override void ConfigureWebHost(IWebHostBuilder builder)
     {
-        builder.UseEnvironment("Testing");
+        builder.UseEnvironment(_environmentName);
 
         builder.UseSetting("Jwt:Key", "test-only-signing-key-32-chars-minimum-for-hmacsha256");
         builder.UseSetting("Jwt:Issuer", "WebshopApiTests");
