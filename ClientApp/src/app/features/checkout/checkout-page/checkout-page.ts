@@ -1,4 +1,4 @@
-import { Component, OnInit, AfterViewInit, inject, signal, ElementRef, viewChild } from '@angular/core';
+import { Component, OnInit, AfterViewInit, inject, signal, effect, ElementRef, viewChild } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
 import { FormsModule } from '@angular/forms';
@@ -7,10 +7,11 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
-import { loadStripe, Stripe, StripeElements, StripeCardElement } from '@stripe/stripe-js';
+import { loadStripe, Stripe, StripeElements, StripeCardElement, StripeElementStyle } from '@stripe/stripe-js';
 import { CartService } from '../../../core/services/cart.service';
 import { OrderService } from '../../../core/services/order.service';
 import { PaymentService } from '../../../core/services/payment.service';
+import { ThemeService } from '../../../core/services/theme.service';
 import { environment } from '../../../../environments/environment';
 
 @Component({
@@ -27,6 +28,7 @@ export class CheckoutPageComponent implements OnInit, AfterViewInit {
   cartService = inject(CartService);
   private orderService = inject(OrderService);
   private paymentService = inject(PaymentService);
+  private themeService = inject(ThemeService);
   private router = inject(Router);
 
   cardElementRef = viewChild<ElementRef>('cardElement');
@@ -39,6 +41,15 @@ export class CheckoutPageComponent implements OnInit, AfterViewInit {
   private stripe: Stripe | null = null;
   private elements: StripeElements | null = null;
   private cardElement: StripeCardElement | null = null;
+
+  constructor() {
+    // Stripe's card element renders in its own iframe and doesn't inherit page CSS,
+    // so it needs its colors pushed in explicitly and re-pushed on theme changes.
+    effect(() => {
+      this.themeService.isDark();
+      this.cardElement?.update({ style: this.buildCardStyle() });
+    });
+  }
 
   ngOnInit(): void {
     if (this.cartService.items().length === 0) {
@@ -54,13 +65,35 @@ export class CheckoutPageComponent implements OnInit, AfterViewInit {
     }
 
     this.elements = this.stripe.elements();
-    this.cardElement = this.elements.create('card');
+    this.cardElement = this.elements.create('card', { style: this.buildCardStyle() });
 
     const el = this.cardElementRef()?.nativeElement;
     if (el) {
       this.cardElement.mount(el);
       this.cardReady.set(true);
     }
+  }
+
+  private buildCardStyle(): StripeElementStyle {
+    return {
+      base: {
+        color: this.resolveCssColor('--mat-sys-on-surface'),
+        '::placeholder': { color: this.resolveCssColor('--mat-sys-on-surface-variant') }
+      }
+    };
+  }
+
+  // getComputedStyle().getPropertyValue() on a custom property returns its raw token
+  // string (e.g. "light-dark(#1a1b1f, #e3e2e6)"), not a resolved color - light-dark()
+  // only evaluates when used as an actual CSS property value. Applying it to a real
+  // element's `color` and reading that back gives the browser's resolved rgb().
+  private resolveCssColor(varName: string): string {
+    const probe = document.createElement('span');
+    probe.style.color = `var(${varName})`;
+    document.body.appendChild(probe);
+    const resolved = getComputedStyle(probe).color;
+    probe.remove();
+    return resolved;
   }
 
   async submitPayment(): Promise<void> {

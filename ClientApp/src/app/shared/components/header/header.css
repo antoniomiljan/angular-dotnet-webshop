@@ -5,7 +5,7 @@
 }
 
 .brand {
-  color: white;
+  color: inherit;
   text-decoration: none;
   font-size: 1.25rem;
   font-weight: 600;
