@@ -76,7 +76,7 @@ export class AdminCategories implements OnInit {
 
     this.categoryService.deleteCategory(id).subscribe({
       next: () => this.loadCategories(),
-      error: (err) => this.error.set(err.error ?? 'Failed to delete category. It may still have active products.')
+      error: (err) => this.error.set(err.error ?? 'Failed to delete category. It may still have products assigned to it, including deleted ones.')
     });
   }
 }
