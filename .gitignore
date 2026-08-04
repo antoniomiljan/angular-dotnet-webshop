@@ -2,6 +2,8 @@
 Api/bin/
 Api/obj/
 Api/appsettings.Development.json
+Api.Tests/bin/
+Api.Tests/obj/
 
 # Angular
 ClientApp/node_modules/

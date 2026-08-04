@@ -92,3 +92,6 @@ app.UseAuthorization();
 app.MapControllers();
 
 app.Run();
+
+// Exposes the implicit top-level Program class to WebApplicationFactory<Program> in Api.Tests.
+public partial class Program { }
