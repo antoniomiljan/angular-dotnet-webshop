@@ -1,6 +1,72 @@
 <div class="admin-container">
   <h1>Admin Dashboard</h1>
 
+  @if (loading()) {
+    <mat-spinner></mat-spinner>
+  }
+
+  @if (error()) {
+    <p class="error">{{ error() }}</p>
+  }
+
+  @if (dashboard(); as stats) {
+    <div class="stat-tiles">
+      <mat-card class="stat-tile">
+        <span class="stat-label">Revenue</span>
+        <span class="stat-value">${{ stats.totalRevenue.toFixed(2) }}</span>
+      </mat-card>
+
+      <mat-card class="stat-tile">
+        <span class="stat-label">Total Orders</span>
+        <span class="stat-value">{{ stats.totalOrders }}</span>
+      </mat-card>
+
+      <mat-card class="stat-tile" [class.attention]="stats.pendingOrdersCount > 0">
+        <span class="stat-label">Pending Orders</span>
+        <span class="stat-value">{{ stats.pendingOrdersCount }}</span>
+      </mat-card>
+
+      <mat-card class="stat-tile">
+        <span class="stat-label">Active Products</span>
+        <span class="stat-value">{{ stats.activeProductsCount }}</span>
+      </mat-card>
+    </div>
+
+    <div class="dashboard-sections">
+      <mat-card class="dashboard-section">
+        <h3>Low Stock</h3>
+        @if (stats.lowStockProducts.length === 0) {
+          <p class="empty-note">Nothing low on stock.</p>
+        } @else {
+          <ul class="stat-list">
+            @for (product of stats.lowStockProducts; track product.id) {
+              <li>
+                <span>{{ product.name }}</span>
+                <span class="stat-list-value">{{ product.stock }} left</span>
+              </li>
+            }
+          </ul>
+        }
+      </mat-card>
+
+      <mat-card class="dashboard-section">
+        <h3>Top Products</h3>
+        @if (stats.topProducts.length === 0) {
+          <p class="empty-note">No sales yet.</p>
+        } @else {
+          <ul class="stat-list">
+            @for (product of stats.topProducts; track product.productId) {
+              <li>
+                <span>{{ product.name }}</span>
+                <span class="stat-list-value">{{ product.quantitySold }} sold</span>
+              </li>
+            }
+          </ul>
+        }
+      </mat-card>
+    </div>
+  }
+
   <div class="admin-links">
     <mat-card routerLink="/admin/products" class="admin-link-card">
       <h3>Products</h3>

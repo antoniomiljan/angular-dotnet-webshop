@@ -111,6 +111,33 @@ public class TestWebApplicationFactory : WebApplicationFactory<Program>
         return (category, product);
     }
 
+    // Bypasses CreateOrder/Stripe entirely so tests can set up a specific order
+    // status combination directly (dashboard stats need Pending/Paid/Cancelled mixes
+    // that aren't all reachable through the normal checkout flow in a test).
+    public async Task<Order> SeedOrderAsync(OrderStatus status, params (Product Product, int Quantity)[] items)
+    {
+        using var scope = Services.CreateScope();
+        var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+
+        var order = new Order
+        {
+            Status = status,
+            GuestEmail = "seed@example.com",
+            Items = items.Select(i => new OrderItem
+            {
+                ProductId = i.Product.Id,
+                Quantity = i.Quantity,
+                UnitPriceAtPurchase = i.Product.Price
+            }).ToList()
+        };
+        order.TotalAmount = order.Items.Sum(i => i.Quantity * i.UnitPriceAtPurchase);
+
+        db.Orders.Add(order);
+        await db.SaveChangesAsync();
+
+        return order;
+    }
+
     protected override void Dispose(bool disposing)
     {
         base.Dispose(disposing);
