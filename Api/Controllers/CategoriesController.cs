@@ -71,9 +71,9 @@ public class CategoriesController : ControllerBase
         if (category is null)
             return NotFound();
 
-        // Includes deactivated (soft-deleted) products too: they still hold OrderItem history,
-        // and the Product -> Category FK is Restrict, so the delete would fail anyway - this
-        // just gives an accurate error instead of a raw DB constraint violation.
+        // Checks all products, not just active ones: soft-deleted products still hold
+        // OrderItem history, and the Restrict FK on Product.CategoryId would reject the
+        // delete regardless. This returns a clear error instead of a raw DB constraint failure.
         var hasProducts = await _context.Products.AnyAsync(p => p.CategoryId == id);
         if (hasProducts)
             return BadRequest("Cannot delete a category that still has products assigned to it (including deleted ones, which are kept for order history). Reassign them to another category first.");

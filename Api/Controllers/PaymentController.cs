@@ -17,6 +17,8 @@ public class PaymentsController : ControllerBase
     }
 
     // POST: api/payments/create-intent/5
+    // No ownership check against the order's access token: any caller who knows or
+    // guesses an order id can create a PaymentIntent for it.
     [HttpPost("create-intent/{orderId}")]
     public async Task<IActionResult> CreatePaymentIntent(int orderId)
     {
@@ -36,6 +38,8 @@ public class PaymentsController : ControllerBase
             AutomaticPaymentMethods = new PaymentIntentAutomaticPaymentMethodsOptions
             {
                 Enabled = true,
+                // Restricts automatic payment methods to ones that don't redirect off-site;
+                // the card element flow (including 3D Secure) doesn't need one.
                 AllowRedirects = "never",
             },
             Metadata = new Dictionary<string, string>

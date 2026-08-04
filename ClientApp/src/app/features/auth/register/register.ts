@@ -34,6 +34,7 @@ export class Register {
         this.router.navigate(['/']);
       },
       error: (err) => {
+        // Backend returns an array of validation messages; only the first is shown.
         this.error.set(err.error?.[0] ?? 'Registration failed.');
         this.loading.set(false);
       }

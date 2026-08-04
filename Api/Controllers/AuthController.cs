@@ -48,6 +48,8 @@ public class AuthController : ControllerBase
         if (user is null)
             return Unauthorized("Invalid email or password.");
 
+        // CheckPasswordAsync bypasses SignInManager's lockout policy, so failed
+        // attempts are not rate-limited or locked out.
         var validPassword = await _userManager.CheckPasswordAsync(user, dto.Password);
         if (!validPassword)
             return Unauthorized("Invalid email or password.");

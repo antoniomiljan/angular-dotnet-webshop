@@ -6,6 +6,8 @@ import { LoginRequest, RegisterRequest, AuthResponse } from '../../shared/models
 
 const TOKEN_KEY = 'webshop_token';
 
+// ASP.NET Core Identity remaps the short "role" claim to this long URI by default
+// when issuing the JWT; the token has no plain "role" key.
 interface DecodedToken {
   sub: string;
   email: string;
@@ -18,6 +20,8 @@ export class AuthService {
   private http = inject(HttpClient);
   private baseUrl = `${environment.apiUrl}/auth`;
 
+  // Set once from the stored token and never re-checked against its expiry, so a
+  // session can read as logged-in/admin here after the token has actually expired.
   currentEmail = signal<string | null>(this.getStoredEmail());
   isAdmin = signal<boolean>(this.getStoredIsAdmin());
 

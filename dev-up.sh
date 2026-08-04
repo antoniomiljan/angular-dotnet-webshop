@@ -26,8 +26,8 @@ until docker compose exec -T db pg_isready -U postgres >/dev/null 2>&1; do
   sleep 1
 done
 
-# Free up 5255 if a stale `dotnet run` from a previous session is still holding it -
-# otherwise you keep talking to yesterday's compiled code without realizing it.
+# Kill a stale dotnet process left on :5255 from a previous session; otherwise the
+# API keeps serving outdated compiled code with no indication it's doing so.
 STALE_PID="$(lsof -ti:5255 2>/dev/null || true)"
 if [ -n "$STALE_PID" ]; then
   echo "==> Killing stale process on :5255 (pid $STALE_PID)"

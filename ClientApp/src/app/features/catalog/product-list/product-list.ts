@@ -21,6 +21,8 @@ export class ProductListComponent implements OnInit {
   error = signal<string | null>(null);
 
   ngOnInit(): void {
+    // getProducts() accepts categoryId/search, but nothing in this component's
+    // template exposes filtering yet - every product is always loaded.
     this.productService.getProducts().subscribe({
       next: (data) => {
         this.products.set(data);

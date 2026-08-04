@@ -101,9 +101,8 @@ export class CheckoutPageComponent implements OnInit, AfterViewInit {
         this.cartService.clear();
         this.router.navigate(['/order-confirmation', order.id], { queryParams: { token: order.accessToken } });
       } else {
-        // Not an error, but not confirmed either (e.g. still requires action) - stock was
-        // already reserved when the order was created, so give it back rather than leaving
-        // the order stuck Pending forever with no way for the customer to retry.
+        // Neither succeeded nor errored (e.g. still requires action). Stock was already
+        // reserved at order creation, so release it instead of leaving the order stuck Pending.
         this.error.set('Payment could not be completed. Please try again.');
         this.releaseStock(order.id, order.accessToken);
       }

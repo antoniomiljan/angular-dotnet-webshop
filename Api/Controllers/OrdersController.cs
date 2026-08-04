@@ -52,8 +52,8 @@ public class OrdersController : ControllerBase
 
         await using var transaction = await _context.Database.BeginTransactionAsync();
 
-        // Decrement stock atomically per row (WHERE Stock >= Quantity) so two concurrent
-        // checkouts for the last unit can't both succeed - the DB, not this process, is the guard.
+        // Atomic conditional UPDATE (WHERE Stock >= Quantity) prevents two concurrent
+        // checkouts from both passing the stock check and overselling the last unit.
         foreach (var item in dto.Items)
         {
             var rowsAffected = await _context.Products
@@ -77,8 +77,8 @@ public class OrdersController : ControllerBase
         return CreatedAtAction(nameof(GetOrder), new { id = order.Id, token = order.AccessToken }, _mapper.Map<OrderDto>(order));
     }
 
-    // GET: api/orders/5?token=... (guest order lookup - token is the only proof of ownership, so a
-    // wrong/missing token looks identical to a missing order rather than leaking that the id exists)
+    // GET: api/orders/5?token=... (guest order lookup, gated by the order's access token)
+    // A wrong or missing token returns 404, the same as a nonexistent id, to prevent order enumeration.
     [HttpGet("{id}")]
     public async Task<ActionResult<OrderDto>> GetOrder(int id, [FromQuery] Guid token)
     {
@@ -92,8 +92,8 @@ public class OrdersController : ControllerBase
         return Ok(_mapper.Map<OrderDto>(order));
     }
 
-    // POST: api/orders/5/cancel?token=... (guest self-cancel - only while still Pending, e.g. after
-    // Stripe confirmation fails or never completes, so the stock reserved at creation isn't stuck forever)
+    // POST: api/orders/5/cancel?token=... (guest self-cancel, only while the order is Pending)
+    // Restores the stock reserved at order creation when Stripe confirmation fails or is abandoned.
     [HttpPost("{id}/cancel")]
     public async Task<IActionResult> CancelOrder(int id, [FromQuery] Guid token)
     {

@@ -24,6 +24,9 @@ export class CartService {
     });
   }
 
+  // Clamping to product.stock here is a UX convenience only, based on stock as of
+  // when the product was loaded. The order-creation endpoint is the actual source
+  // of truth and re-checks stock at write time.
   addItem(product: Product, quantity: number = 1): void {
     this.itemsSignal.update(items => {
       const existing = items.find(i => i.product.id === product.id);

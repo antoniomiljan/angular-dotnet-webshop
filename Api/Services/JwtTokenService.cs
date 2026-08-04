@@ -24,6 +24,8 @@ public class JwtTokenService
             new(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString())
         };
 
+        // JwtSecurityTokenHandler serializes ClaimTypes.Role to its full schema URI in
+        // the token, not "role" - the Angular AuthService decodes it under that long key.
         foreach (var role in roles)
             claims.Add(new Claim(ClaimTypes.Role, role));
 

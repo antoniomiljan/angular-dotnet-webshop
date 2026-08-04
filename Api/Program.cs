@@ -51,6 +51,7 @@ builder.Services.AddAuthentication(options =>
 
 builder.Services.AddAuthorization();
 
+// Origin is dev-only. Add the production Angular origin before deploying.
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowAngular", policy =>
@@ -73,6 +74,8 @@ using (var scope = app.Services.CreateScope())
     if (!await roleManager.RoleExistsAsync("Admin"))
         await roleManager.CreateAsync(new IdentityRole<Guid>("Admin"));
 
+    // Assigns the Admin role if this user already exists; does not create the account.
+    // The admin@test.com user must be registered through /api/auth/register first.
     var adminUser = await userManager.FindByEmailAsync("admin@test.com");
     if (adminUser is not null && !await userManager.IsInRoleAsync(adminUser, "Admin"))
         await userManager.AddToRoleAsync(adminUser, "Admin");

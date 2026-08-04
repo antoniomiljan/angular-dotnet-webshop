@@ -47,6 +47,9 @@ public async Task<IActionResult> StripeWebhook()
         var order = await _context.Orders
             .FirstOrDefaultAsync(o => o.StripePaymentIntentId == paymentIntent!.Id);
 
+        // Stripe can deliver the same event more than once, and the order may already
+        // have moved past Pending (e.g. an admin already actioned it) - only advance
+        // from Pending so a replayed event can't revert a later status.
         if (order is not null && order.Status == OrderStatus.Pending)
         {
             order.Status = OrderStatus.Paid;

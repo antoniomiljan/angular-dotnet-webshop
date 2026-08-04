@@ -1,5 +1,7 @@
 namespace Api.Models;
 
+// Not read or written by any endpoint. The active cart is client-side only
+// (CartService + localStorage in the Angular app).
 public class Cart
 {
     public int Id { get; set; }

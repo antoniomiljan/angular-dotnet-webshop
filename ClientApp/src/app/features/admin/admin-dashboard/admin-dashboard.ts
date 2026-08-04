@@ -9,4 +9,5 @@ import { MatCardModule } from '@angular/material/card';
   templateUrl: './admin-dashboard.html',
   styleUrl: './admin-dashboard.css'
 })
+// Placeholder: links out to the other admin pages, no data or stats of its own yet.
 export class AdminDashboard {}
