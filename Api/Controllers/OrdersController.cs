@@ -36,13 +36,6 @@ public class OrdersController : ControllerBase
         if (missingIds.Any())
             return BadRequest($"Invalid or inactive product(s): {string.Join(", ", missingIds)}");
 
-        foreach (var item in dto.Items)
-        {
-            var stock = products[item.ProductId].Stock;
-            if (item.Quantity > stock)
-                return BadRequest($"Insufficient stock for '{products[item.ProductId].Name}'. Available: {stock}");
-        }
-
         var order = new Order
         {
             GuestEmail = dto.GuestEmail,
@@ -57,11 +50,26 @@ public class OrdersController : ControllerBase
 
         order.TotalAmount = order.Items.Sum(i => i.Quantity * i.UnitPriceAtPurchase);
 
-        foreach (var item in order.Items)
-            products[item.ProductId].Stock -= item.Quantity;
+        await using var transaction = await _context.Database.BeginTransactionAsync();
+
+        // Decrement stock atomically per row (WHERE Stock >= Quantity) so two concurrent
+        // checkouts for the last unit can't both succeed - the DB, not this process, is the guard.
+        foreach (var item in dto.Items)
+        {
+            var rowsAffected = await _context.Products
+                .Where(p => p.Id == item.ProductId && p.Stock >= item.Quantity)
+                .ExecuteUpdateAsync(s => s.SetProperty(p => p.Stock, p => p.Stock - item.Quantity));
+
+            if (rowsAffected == 0)
+            {
+                await transaction.RollbackAsync();
+                return BadRequest($"Insufficient stock for '{products[item.ProductId].Name}'.");
+            }
+        }
 
         _context.Orders.Add(order);
         await _context.SaveChangesAsync();
+        await transaction.CommitAsync();
 
         await _context.Entry(order).Collection(o => o.Items).Query()
             .Include(oi => oi.Product).LoadAsync();
