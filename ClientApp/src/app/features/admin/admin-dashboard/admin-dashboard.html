@@ -34,15 +34,14 @@
 
     <div class="dashboard-sections">
       <mat-card class="dashboard-section">
-        <h3>Low Stock</h3>
-        @if (stats.lowStockProducts.length === 0) {
-          <p class="empty-note">Nothing low on stock.</p>
+        <h3>Out of Stock</h3>
+        @if (stats.outOfStockProducts.length === 0) {
+          <p class="empty-note">Everything is in stock.</p>
         } @else {
           <ul class="stat-list">
-            @for (product of stats.lowStockProducts; track product.id) {
+            @for (product of stats.outOfStockProducts; track product.id) {
               <li>
                 <span>{{ product.name }}</span>
-                <span class="stat-list-value">{{ product.stock }} left</span>
               </li>
             }
           </ul>

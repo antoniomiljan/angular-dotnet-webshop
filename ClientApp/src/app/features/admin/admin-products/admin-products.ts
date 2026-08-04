@@ -8,6 +8,7 @@ import { MatInputModule } from '@angular/material/input';
 import { MatSelectModule } from '@angular/material/select';
 import { MatIconModule } from '@angular/material/icon';
 import { MatTableModule } from '@angular/material/table';
+import { MatSlideToggleModule } from '@angular/material/slide-toggle';
 import { ProductService } from '../../../core/services/product.service';
 import { CategoryService } from '../../../core/services/category.service';
 import { Product } from '../../../shared/models/product.model';
@@ -18,7 +19,8 @@ import { Category } from '../../../shared/models/category.model';
   standalone: true,
   imports: [
     CommonModule, FormsModule, MatCardModule, MatButtonModule,
-    MatFormFieldModule, MatInputModule, MatSelectModule, MatIconModule, MatTableModule
+    MatFormFieldModule, MatInputModule, MatSelectModule, MatIconModule,
+    MatTableModule, MatSlideToggleModule
   ],
   templateUrl: './admin-products.html',
   styleUrl: './admin-products.css'
@@ -32,13 +34,13 @@ export class AdminProducts implements OnInit {
   editingId = signal<number | null>(null);
   error = signal<string | null>(null);
 
-  columns = ['name', 'price', 'stock', 'category', 'actions'];
+  columns = ['name', 'price', 'inStock', 'category', 'actions'];
 
   form = {
     name: '',
     description: '',
     price: 0,
-    stock: 0,
+    inStock: true,
     imageUrl: '',
     categoryId: 0
   };
@@ -70,7 +72,7 @@ export class AdminProducts implements OnInit {
       name: product.name,
       description: product.description,
       price: product.price,
-      stock: product.stock,
+      inStock: product.inStock,
       imageUrl: product.imageUrl ?? '',
       categoryId: product.categoryId
     };
@@ -78,7 +80,7 @@ export class AdminProducts implements OnInit {
 
   startCreate(): void {
     this.editingId.set(-1);
-    this.form = { name: '', description: '', price: 0, stock: 0, imageUrl: '', categoryId: this.categories()[0]?.id ?? 0 };
+    this.form = { name: '', description: '', price: 0, inStock: true, imageUrl: '', categoryId: this.categories()[0]?.id ?? 0 };
   }
 
   cancelEdit(): void {
@@ -102,6 +104,22 @@ export class AdminProducts implements OnInit {
         error: (err) => this.error.set(err.error ?? 'Failed to update product.')
       });
     }
+  }
+
+  toggleInStock(product: Product): void {
+    const payload = {
+      name: product.name,
+      description: product.description,
+      price: product.price,
+      inStock: !product.inStock,
+      imageUrl: product.imageUrl,
+      categoryId: product.categoryId
+    };
+
+    this.productService.updateProduct(product.id, payload).subscribe({
+      next: () => this.loadProducts(),
+      error: () => this.error.set('Failed to update stock status.')
+    });
   }
 
   deleteProduct(id: number): void {

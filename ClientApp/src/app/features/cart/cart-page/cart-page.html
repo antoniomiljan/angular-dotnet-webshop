@@ -19,7 +19,6 @@
               [value]="item.quantity"
               (change)="updateQuantity(item.product.id, $any($event.target).valueAsNumber)"
               min="1"
-              [max]="item.product.stock"
               class="qty-input"
             />
             <p class="line-total">${{ (item.product.price * item.quantity).toFixed(2) }}</p>

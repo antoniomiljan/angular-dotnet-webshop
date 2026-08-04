@@ -13,7 +13,6 @@ namespace Api.Controllers;
 public class DashboardController : ControllerBase
 {
     private readonly AppDbContext _context;
-    private const int LowStockThreshold = 10;
 
     // Statuses that represent an actual completed sale, not just a placed order.
     private static readonly OrderStatus[] RevenueStatuses =
@@ -36,10 +35,10 @@ public class DashboardController : ControllerBase
         var pendingOrdersCount = await _context.Orders.CountAsync(o => o.Status == OrderStatus.Pending);
         var activeProductsCount = await _context.Products.CountAsync(p => p.IsActive);
 
-        var lowStockProducts = await _context.Products
-            .Where(p => p.IsActive && p.Stock <= LowStockThreshold)
-            .OrderBy(p => p.Stock)
-            .Select(p => new LowStockProductDto { Id = p.Id, Name = p.Name, Stock = p.Stock })
+        var outOfStockProducts = await _context.Products
+            .Where(p => p.IsActive && !p.InStock)
+            .OrderBy(p => p.Name)
+            .Select(p => new OutOfStockProductDto { Id = p.Id, Name = p.Name })
             .ToListAsync();
 
         var topProducts = await _context.OrderItems
@@ -62,7 +61,7 @@ public class DashboardController : ControllerBase
             TotalOrders = totalOrders,
             PendingOrdersCount = pendingOrdersCount,
             ActiveProductsCount = activeProductsCount,
-            LowStockProducts = lowStockProducts,
+            OutOfStockProducts = outOfStockProducts,
             TopProducts = topProducts
         });
     }

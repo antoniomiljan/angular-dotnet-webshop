@@ -6,15 +6,14 @@ public class DashboardDto
     public int TotalOrders { get; set; }
     public int PendingOrdersCount { get; set; }
     public int ActiveProductsCount { get; set; }
-    public List<LowStockProductDto> LowStockProducts { get; set; } = new();
+    public List<OutOfStockProductDto> OutOfStockProducts { get; set; } = new();
     public List<TopProductDto> TopProducts { get; set; } = new();
 }
 
-public class LowStockProductDto
+public class OutOfStockProductDto
 {
     public int Id { get; set; }
     public string Name { get; set; } = string.Empty;
-    public int Stock { get; set; }
 }
 
 public class TopProductDto

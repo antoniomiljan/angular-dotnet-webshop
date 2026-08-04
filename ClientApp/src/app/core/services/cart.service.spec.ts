@@ -8,7 +8,7 @@ function makeProduct(overrides: Partial<Product> = {}): Product {
     name: 'Test Product',
     description: 'A product',
     price: 10,
-    stock: 5,
+    inStock: true,
     imageUrl: null,
     categoryId: 1,
     categoryName: 'Category',
@@ -29,38 +29,31 @@ describe('CartService', () => {
 
   it('addItem() adds a new item at the requested quantity', () => {
     const service = TestBed.inject(CartService);
-    service.addItem(makeProduct({ stock: 5 }), 2);
+    service.addItem(makeProduct(), 2);
 
     expect(service.items().length).toBe(1);
     expect(service.items()[0].quantity).toBe(2);
   });
 
-  it('addItem() clamps quantity to available stock', () => {
+  it('addItem() on an existing item adds to the existing quantity', () => {
     const service = TestBed.inject(CartService);
-    service.addItem(makeProduct({ stock: 3 }), 10);
-
-    expect(service.items()[0].quantity).toBe(3);
-  });
-
-  it('addItem() on an existing item adds to quantity, still clamped to stock', () => {
-    const service = TestBed.inject(CartService);
-    const product = makeProduct({ stock: 5 });
+    const product = makeProduct();
 
     service.addItem(product, 3);
     service.addItem(product, 4);
 
     expect(service.items().length).toBe(1);
-    expect(service.items()[0].quantity).toBe(5);
+    expect(service.items()[0].quantity).toBe(7);
   });
 
-  it('updateQuantity() clamps to the product stock', () => {
+  it('updateQuantity() sets the quantity directly', () => {
     const service = TestBed.inject(CartService);
-    const product = makeProduct({ stock: 4 });
+    const product = makeProduct();
     service.addItem(product, 1);
 
     service.updateQuantity(product.id, 10);
 
-    expect(service.items()[0].quantity).toBe(4);
+    expect(service.items()[0].quantity).toBe(10);
   });
 
   it('updateQuantity() with zero or below removes the item', () => {
@@ -88,16 +81,16 @@ describe('CartService', () => {
 
   it('itemCount() sums quantities across items', () => {
     const service = TestBed.inject(CartService);
-    service.addItem(makeProduct({ id: 1, stock: 5 }), 2);
-    service.addItem(makeProduct({ id: 2, stock: 5 }), 3);
+    service.addItem(makeProduct({ id: 1 }), 2);
+    service.addItem(makeProduct({ id: 2 }), 3);
 
     expect(service.itemCount()).toBe(5);
   });
 
   it('totalPrice() sums price * quantity across items', () => {
     const service = TestBed.inject(CartService);
-    service.addItem(makeProduct({ id: 1, price: 10, stock: 5 }), 2);
-    service.addItem(makeProduct({ id: 2, price: 5, stock: 5 }), 1);
+    service.addItem(makeProduct({ id: 1, price: 10 }), 2);
+    service.addItem(makeProduct({ id: 2, price: 5 }), 1);
 
     expect(service.totalPrice()).toBe(25);
   });

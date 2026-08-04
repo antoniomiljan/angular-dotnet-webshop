@@ -19,10 +19,12 @@
       <mat-card-content>
         <p>{{ p.description }}</p>
         <p class="price">${{ p.price.toFixed(2) }}</p>
-        <p class="stock">{{ p.stock }} in stock</p>
+        <p class="stock-badge" [class.out-of-stock]="!p.inStock">
+          {{ p.inStock ? 'In Stock' : 'Out of Stock' }}
+        </p>
       </mat-card-content>
       <mat-card-actions>
-        <button mat-raised-button color="primary" [disabled]="p.stock === 0" (click)="addToCart(p)">
+        <button mat-raised-button color="primary" [disabled]="!p.inStock" (click)="addToCart(p)">
         Add to Cart
         </button>
       </mat-card-actions>

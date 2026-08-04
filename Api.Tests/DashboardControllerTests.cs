@@ -52,18 +52,18 @@ public class DashboardControllerTests : IDisposable
     }
 
     [Fact]
-    public async Task GetDashboard_ListsOnlyLowStockActiveProducts()
+    public async Task GetDashboard_ListsOnlyOutOfStockActiveProducts()
     {
-        var (_, lowStock) = await _factory.SeedProductAsync(stock: 3);
-        var (_, healthyStock) = await _factory.SeedProductAsync(stock: 50);
-        var (_, inactiveLowStock) = await _factory.SeedProductAsync(stock: 1, active: false);
+        var (_, outOfStock) = await _factory.SeedProductAsync(inStock: false);
+        var (_, inStock) = await _factory.SeedProductAsync(inStock: true);
+        var (_, inactiveOutOfStock) = await _factory.SeedProductAsync(inStock: false, active: false);
 
         var dashboard = await _client.GetFromJsonAsync<DashboardDto>("/api/dashboard", Json);
 
         Assert.NotNull(dashboard);
-        Assert.Contains(dashboard.LowStockProducts, p => p.Id == lowStock.Id);
-        Assert.DoesNotContain(dashboard.LowStockProducts, p => p.Id == healthyStock.Id);
-        Assert.DoesNotContain(dashboard.LowStockProducts, p => p.Id == inactiveLowStock.Id);
+        Assert.Contains(dashboard.OutOfStockProducts, p => p.Id == outOfStock.Id);
+        Assert.DoesNotContain(dashboard.OutOfStockProducts, p => p.Id == inStock.Id);
+        Assert.DoesNotContain(dashboard.OutOfStockProducts, p => p.Id == inactiveOutOfStock.Id);
     }
 
     [Fact]

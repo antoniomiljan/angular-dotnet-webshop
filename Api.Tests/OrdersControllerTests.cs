@@ -24,29 +24,23 @@ public class OrdersControllerTests : IDisposable
     };
 
     [Fact]
-    public async Task CreateOrder_Succeeds_AndDecrementsStock()
+    public async Task CreateOrder_Succeeds_ForInStockProduct()
     {
-        var (_, product) = await _factory.SeedProductAsync(stock: 5);
+        var (_, product) = await _factory.SeedProductAsync(inStock: true);
 
         var response = await _client.PostAsJsonAsync("/api/orders", OrderPayload(product.Id, 2));
 
         Assert.Equal(HttpStatusCode.Created, response.StatusCode);
-
-        var productAfter = await _client.GetFromJsonAsync<JsonElement>($"/api/products/{product.Id}", Json);
-        Assert.Equal(3, productAfter.GetProperty("stock").GetInt32());
     }
 
     [Fact]
-    public async Task CreateOrder_Fails_WhenQuantityExceedsStock()
+    public async Task CreateOrder_Fails_WhenProductOutOfStock()
     {
-        var (_, product) = await _factory.SeedProductAsync(stock: 1);
+        var (_, product) = await _factory.SeedProductAsync(inStock: false);
 
-        var response = await _client.PostAsJsonAsync("/api/orders", OrderPayload(product.Id, 2));
+        var response = await _client.PostAsJsonAsync("/api/orders", OrderPayload(product.Id, 1));
 
         Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
-
-        var productAfter = await _client.GetFromJsonAsync<JsonElement>($"/api/products/{product.Id}", Json);
-        Assert.Equal(1, productAfter.GetProperty("stock").GetInt32());
     }
 
     [Fact]
@@ -71,20 +65,18 @@ public class OrdersControllerTests : IDisposable
         Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
     }
 
+    // InStock is a manually-set flag, not a decremented count, so there's no quantity
+    // to oversell - concurrent orders for the same in-stock product should all succeed.
     [Fact]
-    public async Task CreateOrder_PreventsOverselling_UnderConcurrentRequests()
+    public async Task CreateOrder_AllowsConcurrentOrders_ForInStockProduct()
     {
-        var (_, product) = await _factory.SeedProductAsync(stock: 1);
+        var (_, product) = await _factory.SeedProductAsync(inStock: true);
         var payload = OrderPayload(product.Id, 1);
 
         var responses = await Task.WhenAll(Enumerable.Range(0, 5)
             .Select(_ => _client.PostAsJsonAsync("/api/orders", payload)));
 
-        Assert.Equal(1, responses.Count(r => r.StatusCode == HttpStatusCode.Created));
-        Assert.Equal(4, responses.Count(r => r.StatusCode == HttpStatusCode.BadRequest));
-
-        var productAfter = await _client.GetFromJsonAsync<JsonElement>($"/api/products/{product.Id}", Json);
-        Assert.Equal(0, productAfter.GetProperty("stock").GetInt32());
+        Assert.All(responses, r => Assert.Equal(HttpStatusCode.Created, r.StatusCode));
     }
 
     [Fact]
@@ -121,17 +113,15 @@ public class OrdersControllerTests : IDisposable
     }
 
     [Fact]
-    public async Task CancelOrder_RestoresStock_AndMarksCancelled()
+    public async Task CancelOrder_MarksCancelled()
     {
-        var (_, product) = await _factory.SeedProductAsync(stock: 5);
+        var (_, product) = await _factory.SeedProductAsync();
         var created = await CreateOrderAsync(product.Id, quantity: 2);
 
         var cancelResponse = await _client.PostAsync(
             $"/api/orders/{created.Id}/cancel?token={created.AccessToken}", content: null);
-        Assert.Equal(HttpStatusCode.NoContent, cancelResponse.StatusCode);
 
-        var productAfter = await _client.GetFromJsonAsync<JsonElement>($"/api/products/{product.Id}", Json);
-        Assert.Equal(5, productAfter.GetProperty("stock").GetInt32());
+        Assert.Equal(HttpStatusCode.NoContent, cancelResponse.StatusCode);
     }
 
     [Fact]

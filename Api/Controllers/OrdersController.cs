@@ -36,6 +36,13 @@ public class OrdersController : ControllerBase
         if (missingIds.Any())
             return BadRequest($"Invalid or inactive product(s): {string.Join(", ", missingIds)}");
 
+        var outOfStockNames = dto.Items
+            .Where(item => !products[item.ProductId].InStock)
+            .Select(item => products[item.ProductId].Name)
+            .ToList();
+        if (outOfStockNames.Any())
+            return BadRequest($"Out of stock: {string.Join(", ", outOfStockNames)}");
+
         var order = new Order
         {
             GuestEmail = dto.GuestEmail,
@@ -50,26 +57,8 @@ public class OrdersController : ControllerBase
 
         order.TotalAmount = order.Items.Sum(i => i.Quantity * i.UnitPriceAtPurchase);
 
-        await using var transaction = await _context.Database.BeginTransactionAsync();
-
-        // Atomic conditional UPDATE (WHERE Stock >= Quantity) prevents two concurrent
-        // checkouts from both passing the stock check and overselling the last unit.
-        foreach (var item in dto.Items)
-        {
-            var rowsAffected = await _context.Products
-                .Where(p => p.Id == item.ProductId && p.Stock >= item.Quantity)
-                .ExecuteUpdateAsync(s => s.SetProperty(p => p.Stock, p => p.Stock - item.Quantity));
-
-            if (rowsAffected == 0)
-            {
-                await transaction.RollbackAsync();
-                return BadRequest($"Insufficient stock for '{products[item.ProductId].Name}'.");
-            }
-        }
-
         _context.Orders.Add(order);
         await _context.SaveChangesAsync();
-        await transaction.CommitAsync();
 
         await _context.Entry(order).Collection(o => o.Items).Query()
             .Include(oi => oi.Product).LoadAsync();
@@ -93,13 +82,10 @@ public class OrdersController : ControllerBase
     }
 
     // POST: api/orders/5/cancel?token=... (guest self-cancel, only while the order is Pending)
-    // Restores the stock reserved at order creation when Stripe confirmation fails or is abandoned.
     [HttpPost("{id}/cancel")]
     public async Task<IActionResult> CancelOrder(int id, [FromQuery] Guid token)
     {
-        var order = await _context.Orders
-            .Include(o => o.Items)
-            .FirstOrDefaultAsync(o => o.Id == id);
+        var order = await _context.Orders.FirstOrDefaultAsync(o => o.Id == id);
 
         if (order is null || order.AccessToken != token)
             return NotFound();
@@ -107,18 +93,8 @@ public class OrdersController : ControllerBase
         if (order.Status != OrderStatus.Pending)
             return BadRequest("Only a pending order can be cancelled this way.");
 
-        await using var transaction = await _context.Database.BeginTransactionAsync();
-
-        foreach (var item in order.Items)
-        {
-            await _context.Products
-                .Where(p => p.Id == item.ProductId)
-                .ExecuteUpdateAsync(s => s.SetProperty(p => p.Stock, p => p.Stock + item.Quantity));
-        }
-
         order.Status = OrderStatus.Cancelled;
         await _context.SaveChangesAsync();
-        await transaction.CommitAsync();
 
         return NoContent();
     }

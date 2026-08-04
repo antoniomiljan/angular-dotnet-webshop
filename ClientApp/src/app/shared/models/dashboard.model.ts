@@ -1,7 +1,6 @@
-export interface LowStockProduct {
+export interface OutOfStockProduct {
   id: number;
   name: string;
-  stock: number;
 }
 
 export interface TopProduct {
@@ -16,6 +15,6 @@ export interface Dashboard {
   totalOrders: number;
   pendingOrdersCount: number;
   activeProductsCount: number;
-  lowStockProducts: LowStockProduct[];
+  outOfStockProducts: OutOfStockProduct[];
   topProducts: TopProduct[];
 }

@@ -35,9 +35,14 @@
   margin-top: 8px;
 }
 
-.stock {
-  color: #666;
+.stock-badge {
+  color: var(--mat-sys-on-surface-variant);
   font-size: 0.875rem;
+  font-weight: 500;
+}
+
+.stock-badge.out-of-stock {
+  color: var(--mat-sys-error);
 }
 
 .error {
