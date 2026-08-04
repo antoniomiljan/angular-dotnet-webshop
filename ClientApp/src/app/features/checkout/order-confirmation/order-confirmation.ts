@@ -24,14 +24,15 @@ export class OrderConfirmationComponent implements OnInit {
 
   ngOnInit(): void {
     const id = Number(this.route.snapshot.paramMap.get('id'));
+    const token = this.route.snapshot.queryParamMap.get('token');
 
-    if (!id) {
+    if (!id || !token) {
       this.error.set('Invalid order.');
       this.loading.set(false);
       return;
     }
 
-    this.orderService.getOrder(id).subscribe({
+    this.orderService.getOrder(id, token).subscribe({
       next: (data) => {
         this.order.set(data);
         this.loading.set(false);

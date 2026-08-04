@@ -21,5 +21,6 @@ export interface Order {
   totalAmount: number;
   createdAt: string;
   guestEmail: string | null;
+  accessToken: string;
   items: OrderItem[];
 }

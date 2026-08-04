@@ -13,8 +13,8 @@ export class OrderService {
     return this.http.post<Order>(this.baseUrl, request);
   }
 
-  getOrder(id: number): Observable<Order> {
-    return this.http.get<Order>(`${this.baseUrl}/${id}`);
+  getOrder(id: number, token: string): Observable<Order> {
+    return this.http.get<Order>(`${this.baseUrl}/${id}`, { params: { token } });
   }
 
   getAllOrders(): Observable<Order[]> {

@@ -98,7 +98,7 @@ export class CheckoutPageComponent implements OnInit, AfterViewInit {
 
       if (result.paymentIntent?.status === 'succeeded') {
         this.cartService.clear();
-        this.router.navigate(['/order-confirmation', order.id]);
+        this.router.navigate(['/order-confirmation', order.id], { queryParams: { token: order.accessToken } });
       }
     } catch (err) {
       this.error.set('Something went wrong. Please try again.');

@@ -8,6 +8,9 @@ public class Order
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
     public string? StripePaymentIntentId { get; set; }
 
+    // Lets guests fetch their own order confirmation without exposing every order via sequential id guessing.
+    public Guid AccessToken { get; set; } = Guid.NewGuid();
+
     public Guid? UserId { get; set; }
     public ApplicationUser? User { get; set; }
 

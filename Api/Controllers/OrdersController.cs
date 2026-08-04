@@ -74,18 +74,19 @@ public class OrdersController : ControllerBase
         await _context.Entry(order).Collection(o => o.Items).Query()
             .Include(oi => oi.Product).LoadAsync();
 
-        return CreatedAtAction(nameof(GetOrder), new { id = order.Id }, _mapper.Map<OrderDto>(order));
+        return CreatedAtAction(nameof(GetOrder), new { id = order.Id, token = order.AccessToken }, _mapper.Map<OrderDto>(order));
     }
 
-    // GET: api/orders/5
+    // GET: api/orders/5?token=... (guest order lookup - token is the only proof of ownership, so a
+    // wrong/missing token looks identical to a missing order rather than leaking that the id exists)
     [HttpGet("{id}")]
-    public async Task<ActionResult<OrderDto>> GetOrder(int id)
+    public async Task<ActionResult<OrderDto>> GetOrder(int id, [FromQuery] Guid token)
     {
         var order = await _context.Orders
             .Include(o => o.Items).ThenInclude(i => i.Product)
             .FirstOrDefaultAsync(o => o.Id == id);
 
-        if (order is null)
+        if (order is null || order.AccessToken != token)
             return NotFound();
 
         return Ok(_mapper.Map<OrderDto>(order));
