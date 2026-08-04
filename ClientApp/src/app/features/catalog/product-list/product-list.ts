@@ -6,10 +6,14 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatSelectModule } from '@angular/material/select';
+import { MatIconModule } from '@angular/material/icon';
+import { MatDialog } from '@angular/material/dialog';
 import { ProductService } from '../../../core/services/product.service';
 import { CategoryService } from '../../../core/services/category.service';
 import { Product } from '../../../shared/models/product.model';
 import { Category } from '../../../shared/models/category.model';
+import { ResolveImageUrlPipe } from '../../../shared/pipes/resolve-image-url.pipe';
+import { ImageLightboxComponent } from '../../../shared/components/image-lightbox/image-lightbox';
 import { RouterLink } from '@angular/router';
 
 const SEARCH_DEBOUNCE_MS = 300;
@@ -19,7 +23,8 @@ const SEARCH_DEBOUNCE_MS = 300;
   standalone: true,
   imports: [
     CommonModule, FormsModule, MatCardModule, MatProgressSpinnerModule,
-    MatFormFieldModule, MatInputModule, MatSelectModule, RouterLink
+    MatFormFieldModule, MatInputModule, MatSelectModule, MatIconModule,
+    ResolveImageUrlPipe, RouterLink
   ],
   templateUrl: './product-list.html',
   styleUrl: './product-list.css'
@@ -27,6 +32,7 @@ const SEARCH_DEBOUNCE_MS = 300;
 export class ProductListComponent implements OnInit, OnDestroy {
   private productService = inject(ProductService);
   private categoryService = inject(CategoryService);
+  private dialog = inject(MatDialog);
 
   products = signal<Product[]>([]);
   categories = signal<Category[]>([]);
@@ -56,6 +62,21 @@ export class ProductListComponent implements OnInit, OnDestroy {
   onCategoryChange(categoryId: number | null): void {
     this.selectedCategoryId.set(categoryId);
     this.loadProducts();
+  }
+
+  // The card itself has [routerLink] to the detail page - stopping propagation here
+  // keeps a click on the image opening the lightbox instead of also navigating away.
+  openImage(product: Product, event: Event): void {
+    if (product.images.length === 0) return;
+    event.stopPropagation();
+    event.preventDefault();
+
+    this.dialog.open(ImageLightboxComponent, {
+      data: { imageUrls: product.images.map(i => i.imageUrl), alt: product.name, startIndex: 0 },
+      panelClass: 'image-lightbox-panel',
+      maxWidth: '95vw',
+      maxHeight: '95vh'
+    });
   }
 
   loadProducts(): void {

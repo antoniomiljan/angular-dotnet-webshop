@@ -1,0 +1,18 @@
+<button mat-icon-button class="close-button" mat-dialog-close aria-label="Close">
+  <mat-icon>close</mat-icon>
+</button>
+
+@if (data.imageUrls.length > 1) {
+  <button mat-icon-button class="nav-button prev-button" (click)="prev()" aria-label="Previous image">
+    <mat-icon>chevron_left</mat-icon>
+  </button>
+  <button mat-icon-button class="nav-button next-button" (click)="next()" aria-label="Next image">
+    <mat-icon>chevron_right</mat-icon>
+  </button>
+}
+
+<img [src]="data.imageUrls[currentIndex()] | resolveImageUrl" [alt]="data.alt" class="lightbox-image" />
+
+@if (data.imageUrls.length > 1) {
+  <div class="image-counter">{{ currentIndex() + 1 }} / {{ data.imageUrls.length }}</div>
+}

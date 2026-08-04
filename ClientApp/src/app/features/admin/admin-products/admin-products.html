@@ -40,10 +40,44 @@
         </mat-select>
       </mat-form-field>
 
-      <mat-form-field appearance="outline" class="full-width">
-        <mat-label>Image URL (optional)</mat-label>
-        <input matInput [(ngModel)]="form.imageUrl" />
-      </mat-form-field>
+      <div class="image-manager">
+        <h4>Images</h4>
+
+        @if (editingId() === -1) {
+          <p class="hint">Save the product first, then you can add photos.</p>
+        } @else {
+          <div class="image-list">
+            @for (image of currentImages(); track image.id; let i = $index) {
+              <div class="image-item">
+                <img [src]="image.imageUrl | resolveImageUrl" class="image-thumb" alt="Product image" />
+                <div class="image-item-controls">
+                  <button mat-icon-button type="button" [disabled]="i === 0" (click)="moveImage(i, -1)" aria-label="Move earlier">
+                    <mat-icon>chevron_left</mat-icon>
+                  </button>
+                  <button mat-icon-button type="button" [disabled]="i === currentImages().length - 1" (click)="moveImage(i, 1)" aria-label="Move later">
+                    <mat-icon>chevron_right</mat-icon>
+                  </button>
+                  <button mat-icon-button type="button" color="warn" (click)="removeImage(image)" aria-label="Remove image">
+                    <mat-icon>delete</mat-icon>
+                  </button>
+                </div>
+              </div>
+            }
+
+            <input type="file" accept="image/jpeg,image/png,image/webp,image/gif" (change)="onFileSelected($event)" #fileInput hidden />
+            <button mat-stroked-button type="button" class="add-image-button" [disabled]="uploadingImage()" (click)="fileInput.click()">
+              @if (uploadingImage()) {
+                <mat-spinner diameter="18"></mat-spinner>
+              } @else {
+                <ng-container>
+                  <mat-icon>add</mat-icon>
+                  Add Image
+                </ng-container>
+              }
+            </button>
+          </div>
+        }
+      </div>
 
       <div class="form-actions">
         <button mat-button (click)="cancelEdit()">Cancel</button>
@@ -53,6 +87,19 @@
   }
 
   <table mat-table [dataSource]="products()" class="full-width">
+    <ng-container matColumnDef="image">
+      <th mat-header-cell *matHeaderCellDef></th>
+      <td mat-cell *matCellDef="let p">
+        @if (p.images.length > 0) {
+          <img [src]="p.images[0].imageUrl | resolveImageUrl" class="thumbnail" [alt]="p.name" />
+        } @else {
+          <div class="thumbnail-placeholder">
+            <mat-icon>image</mat-icon>
+          </div>
+        }
+      </td>
+    </ng-container>
+
     <ng-container matColumnDef="name">
       <th mat-header-cell *matHeaderCellDef>Name</th>
       <td mat-cell *matCellDef="let p">{{ p.name }}</td>

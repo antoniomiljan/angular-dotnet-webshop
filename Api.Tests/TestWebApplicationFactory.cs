@@ -20,16 +20,24 @@ namespace Api.Tests;
 public class TestWebApplicationFactory : WebApplicationFactory<Program>
 {
     private readonly string _environmentName;
+    // WebApplicationFactory resolves wwwroot to the real Api/wwwroot by default, which
+    // would make upload tests write actual files into the project directory. Pointing
+    // it at a throwaway temp folder instead keeps that isolated and easy to clean up.
+    private readonly string _webRootPath = Path.Combine(Path.GetTempPath(), $"webshop-test-wwwroot-{Guid.NewGuid():N}");
     private SqliteConnection? _connection;
+
+    public string WebRootPath => _webRootPath;
 
     public TestWebApplicationFactory(string environmentName = "Testing")
     {
         _environmentName = environmentName;
+        Directory.CreateDirectory(_webRootPath);
     }
 
     protected override void ConfigureWebHost(IWebHostBuilder builder)
     {
         builder.UseEnvironment(_environmentName);
+        builder.UseWebRoot(_webRootPath);
 
         builder.UseSetting("Jwt:Key", "test-only-signing-key-32-chars-minimum-for-hmacsha256");
         builder.UseSetting("Jwt:Issuer", "WebshopApiTests");
@@ -148,5 +156,8 @@ public class TestWebApplicationFactory : WebApplicationFactory<Program>
     {
         base.Dispose(disposing);
         _connection?.Dispose();
+
+        if (Directory.Exists(_webRootPath))
+            Directory.Delete(_webRootPath, recursive: true);
     }
 }

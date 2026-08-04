@@ -1,1 +1,15 @@
 /* You can add global styles to this file, and also import other style files */
+
+/* Image lightbox dialog: MatDialog's default chrome (max-width, background, shadow)
+   comes from CSS custom properties on the overlay pane, which panelClass targets -
+   there's no component-scoped way to reach it since the dialog renders via CDK
+   overlay, outside the opening component's view. */
+.image-lightbox-panel {
+  --mat-dialog-container-max-width: none;
+  --mat-dialog-container-min-width: 0;
+  --mat-dialog-container-color: transparent;
+}
+
+.image-lightbox-panel .mdc-dialog__surface {
+  box-shadow: none;
+}

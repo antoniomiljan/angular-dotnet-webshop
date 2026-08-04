@@ -38,6 +38,18 @@
     <div class="product-grid">
       @for (product of products(); track product.id) {
         <mat-card class="product-card" [routerLink]="['/products', product.id]">
+          @if (product.images.length > 0) {
+            <img
+              [src]="product.images[0].imageUrl | resolveImageUrl"
+              [alt]="product.name"
+              class="product-image"
+              (click)="openImage(product, $event)"
+            />
+          } @else {
+            <div class="product-image-placeholder">
+              <mat-icon>image</mat-icon>
+            </div>
+          }
           <mat-card-header>
             <mat-card-title>{{ product.name }}</mat-card-title>
             <mat-card-subtitle>{{ product.categoryName }}</mat-card-subtitle>

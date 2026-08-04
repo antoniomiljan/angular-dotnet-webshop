@@ -15,8 +15,6 @@ public class UpdateProductDto
 
     public bool InStock { get; set; } = true;
 
-    public string? ImageUrl { get; set; }
-
     [Required]
     public int CategoryId { get; set; }
 

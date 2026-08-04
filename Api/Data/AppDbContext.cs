@@ -11,6 +11,7 @@ public class AppDbContext : IdentityDbContext<ApplicationUser, IdentityRole<Guid
 
     public DbSet<Category> Categories { get; set; }
     public DbSet<Product> Products { get; set; }
+    public DbSet<ProductImage> ProductImages { get; set; }
     public DbSet<Cart> Carts { get; set; }
     public DbSet<CartItem> CartItems { get; set; }
     public DbSet<Order> Orders { get; set; }
@@ -31,6 +32,14 @@ public class AppDbContext : IdentityDbContext<ApplicationUser, IdentityRole<Guid
             .WithMany(c => c.Products)
             .HasForeignKey(p => p.CategoryId)
             .OnDelete(DeleteBehavior.Restrict);
+
+        // Cascade (EF's default for a required FK, made explicit here): images have no
+        // meaning without their product, unlike Category which is protected by Restrict.
+        builder.Entity<ProductImage>()
+            .HasOne(i => i.Product)
+            .WithMany(p => p.Images)
+            .HasForeignKey(i => i.ProductId)
+            .OnDelete(DeleteBehavior.Cascade);
 
         builder.Entity<Order>()
             .HasOne(o => o.User)

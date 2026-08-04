@@ -1,0 +1,48 @@
+:host {
+  display: block;
+  position: relative;
+  line-height: 0;
+}
+
+.lightbox-image {
+  display: block;
+  max-width: 90vw;
+  max-height: 90vh;
+  object-fit: contain;
+}
+
+.close-button {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  background: rgba(0, 0, 0, 0.6);
+  color: white;
+}
+
+.nav-button {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  background: rgba(0, 0, 0, 0.6);
+  color: white;
+}
+
+.prev-button {
+  left: 8px;
+}
+
+.next-button {
+  right: 8px;
+}
+
+.image-counter {
+  position: absolute;
+  bottom: 8px;
+  left: 50%;
+  transform: translateX(-50%);
+  padding: 2px 10px;
+  border-radius: 12px;
+  background: rgba(0, 0, 0, 0.6);
+  color: white;
+  font-size: 0.8125rem;
+}
