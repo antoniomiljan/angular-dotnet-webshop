@@ -4,6 +4,20 @@
   margin: 0 auto;
 }
 
+.filter-bar {
+  display: flex;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.search-field {
+  flex: 2 1 240px;
+}
+
+.category-field {
+  flex: 1 1 180px;
+}
+
 .product-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
