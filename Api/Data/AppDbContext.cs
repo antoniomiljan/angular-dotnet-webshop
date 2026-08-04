@@ -24,6 +24,14 @@ public class AppDbContext : IdentityDbContext<ApplicationUser, IdentityRole<Guid
             .Property(p => p.Price)
             .HasPrecision(10, 2);
 
+        // Restrict, not the EF-default Cascade: a category delete must never be able to
+        // cascade through Product -> OrderItem and silently wipe past orders' line items.
+        builder.Entity<Product>()
+            .HasOne(p => p.Category)
+            .WithMany(c => c.Products)
+            .HasForeignKey(p => p.CategoryId)
+            .OnDelete(DeleteBehavior.Restrict);
+
         builder.Entity<Order>()
             .HasOne(o => o.User)
             .WithMany(u => u.Orders)

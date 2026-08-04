@@ -71,9 +71,12 @@ public class CategoriesController : ControllerBase
         if (category is null)
             return NotFound();
 
-        var hasProducts = await _context.Products.AnyAsync(p => p.CategoryId == id && p.IsActive);
+        // Includes deactivated (soft-deleted) products too: they still hold OrderItem history,
+        // and the Product -> Category FK is Restrict, so the delete would fail anyway - this
+        // just gives an accurate error instead of a raw DB constraint violation.
+        var hasProducts = await _context.Products.AnyAsync(p => p.CategoryId == id);
         if (hasProducts)
-            return BadRequest("Cannot delete a category that still has active products. Reassign or deactivate them first.");
+            return BadRequest("Cannot delete a category that still has products assigned to it (including deleted ones, which are kept for order history). Reassign them to another category first.");
 
         _context.Categories.Remove(category);
         await _context.SaveChangesAsync();
