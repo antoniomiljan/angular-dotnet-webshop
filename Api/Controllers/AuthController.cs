@@ -11,11 +11,13 @@ namespace Api.Controllers;
 public class AuthController : ControllerBase
 {
     private readonly UserManager<ApplicationUser> _userManager;
+    private readonly SignInManager<ApplicationUser> _signInManager;
     private readonly JwtTokenService _tokenService;
 
-    public AuthController(UserManager<ApplicationUser> userManager, JwtTokenService tokenService)
+    public AuthController(UserManager<ApplicationUser> userManager, SignInManager<ApplicationUser> signInManager, JwtTokenService tokenService)
     {
         _userManager = userManager;
+        _signInManager = signInManager;
         _tokenService = tokenService;
     }
 
@@ -48,10 +50,11 @@ public class AuthController : ControllerBase
         if (user is null)
             return Unauthorized("Invalid email or password.");
 
-        // CheckPasswordAsync bypasses SignInManager's lockout policy, so failed
-        // attempts are not rate-limited or locked out.
-        var validPassword = await _userManager.CheckPasswordAsync(user, dto.Password);
-        if (!validPassword)
+        var result = await _signInManager.CheckPasswordSignInAsync(user, dto.Password, lockoutOnFailure: true);
+        if (result.IsLockedOut)
+            return Unauthorized("This account is temporarily locked due to repeated failed login attempts.");
+
+        if (!result.Succeeded)
             return Unauthorized("Invalid email or password.");
 
         var roles = await _userManager.GetRolesAsync(user);
