@@ -20,8 +20,9 @@ export class AuthService {
   private http = inject(HttpClient);
   private baseUrl = `${environment.apiUrl}/auth`;
 
-  // Set once from the stored token and never re-checked against its expiry, so a
-  // session can read as logged-in/admin here after the token has actually expired.
+  // Checked against expiry on read (construction, login, isLoggedIn()), but not
+  // proactively mid-session; a session that expires while the tab is open is
+  // cleared on its next rejected API call instead (see authInterceptor).
   currentEmail = signal<string | null>(this.getStoredEmail());
   isAdmin = signal<boolean>(this.getStoredIsAdmin());
 
@@ -50,7 +51,16 @@ export class AuthService {
   }
 
   isLoggedIn(): boolean {
-    return !!this.getToken();
+    const token = this.getToken();
+    return !!token && !this.isExpired(token);
+  }
+
+  private isExpired(token: string): boolean {
+    try {
+      return jwtDecode<DecodedToken>(token).exp * 1000 < Date.now();
+    } catch {
+      return true;
+    }
   }
 
   private checkIsAdmin(token: string): boolean {
@@ -66,7 +76,7 @@ export class AuthService {
 
   private getStoredEmail(): string | null {
     const token = this.getToken();
-    if (!token) return null;
+    if (!token || this.isExpired(token)) return null;
     try {
       return jwtDecode<DecodedToken>(token).email;
     } catch {
@@ -76,7 +86,7 @@ export class AuthService {
 
   private getStoredIsAdmin(): boolean {
     const token = this.getToken();
-    if (!token) return false;
+    if (!token || this.isExpired(token)) return false;
     return this.checkIsAdmin(token);
   }
 }
