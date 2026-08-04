@@ -92,6 +92,37 @@ public class OrdersController : ControllerBase
         return Ok(_mapper.Map<OrderDto>(order));
     }
 
+    // POST: api/orders/5/cancel?token=... (guest self-cancel - only while still Pending, e.g. after
+    // Stripe confirmation fails or never completes, so the stock reserved at creation isn't stuck forever)
+    [HttpPost("{id}/cancel")]
+    public async Task<IActionResult> CancelOrder(int id, [FromQuery] Guid token)
+    {
+        var order = await _context.Orders
+            .Include(o => o.Items)
+            .FirstOrDefaultAsync(o => o.Id == id);
+
+        if (order is null || order.AccessToken != token)
+            return NotFound();
+
+        if (order.Status != OrderStatus.Pending)
+            return BadRequest("Only a pending order can be cancelled this way.");
+
+        await using var transaction = await _context.Database.BeginTransactionAsync();
+
+        foreach (var item in order.Items)
+        {
+            await _context.Products
+                .Where(p => p.Id == item.ProductId)
+                .ExecuteUpdateAsync(s => s.SetProperty(p => p.Stock, p => p.Stock + item.Quantity));
+        }
+
+        order.Status = OrderStatus.Cancelled;
+        await _context.SaveChangesAsync();
+        await transaction.CommitAsync();
+
+        return NoContent();
+    }
+
     // GET: api/orders (admin — list all orders)
     [Authorize(Roles = "Admin")]
     [HttpGet]

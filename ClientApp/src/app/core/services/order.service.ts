@@ -24,4 +24,8 @@ export class OrderService {
   updateOrderStatus(id: number, status: string): Observable<void> {
     return this.http.put<void>(`${this.baseUrl}/${id}/status`, { status });
   }
+
+  cancelOrder(id: number, token: string): Observable<void> {
+    return this.http.post<void>(`${this.baseUrl}/${id}/cancel`, {}, { params: { token } });
+  }
 }

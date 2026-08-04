@@ -92,6 +92,7 @@ export class CheckoutPageComponent implements OnInit, AfterViewInit {
 
       if (result.error) {
         this.error.set(result.error.message ?? 'Payment failed.');
+        this.releaseStock(order.id, order.accessToken);
         this.loading.set(false);
         return;
       }
@@ -99,6 +100,12 @@ export class CheckoutPageComponent implements OnInit, AfterViewInit {
       if (result.paymentIntent?.status === 'succeeded') {
         this.cartService.clear();
         this.router.navigate(['/order-confirmation', order.id], { queryParams: { token: order.accessToken } });
+      } else {
+        // Not an error, but not confirmed either (e.g. still requires action) - stock was
+        // already reserved when the order was created, so give it back rather than leaving
+        // the order stuck Pending forever with no way for the customer to retry.
+        this.error.set('Payment could not be completed. Please try again.');
+        this.releaseStock(order.id, order.accessToken);
       }
     } catch (err) {
       this.error.set('Something went wrong. Please try again.');
@@ -106,5 +113,11 @@ export class CheckoutPageComponent implements OnInit, AfterViewInit {
     } finally {
       this.loading.set(false);
     }
+  }
+
+  private releaseStock(orderId: number, accessToken: string): void {
+    this.orderService.cancelOrder(orderId, accessToken).subscribe({
+      error: (err) => console.error('Failed to release stock for cancelled order.', err)
+    });
   }
 }
