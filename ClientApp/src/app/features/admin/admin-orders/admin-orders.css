@@ -20,3 +20,11 @@
 .cancelled-option {
   color: #d32f2f;
 }
+
+table {
+  min-width: 600px;
+}
+
+.admin-container {
+  overflow-x: auto;
+}

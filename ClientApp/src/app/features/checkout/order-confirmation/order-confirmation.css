@@ -39,3 +39,9 @@
 .error {
   color: #d32f2f;
 }
+
+@media (max-width: 500px) {
+  .checkout-container {
+    padding: 12px;
+  }
+}

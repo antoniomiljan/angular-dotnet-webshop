@@ -14,6 +14,10 @@
     <a mat-button routerLink="/login">Log In</a>
   }
 
+  <button mat-icon-button (click)="themeService.toggle()" aria-label="Toggle dark mode">
+    <mat-icon>{{ themeService.isDark() ? 'light_mode' : 'dark_mode' }}</mat-icon>
+  </button>
+
   <button mat-icon-button routerLink="/cart" aria-label="View cart">
     @if (cartService.itemCount() > 0) {
       <mat-icon [matBadge]="cartService.itemCount()" matBadgeColor="accent">

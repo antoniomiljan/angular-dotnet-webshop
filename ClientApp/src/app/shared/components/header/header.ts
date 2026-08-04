@@ -6,6 +6,7 @@ import { MatBadgeModule } from '@angular/material/badge';
 import { MatButtonModule } from '@angular/material/button';
 import { CartService } from '../../../core/services/cart.service';
 import { AuthService } from '../../../core/services/auth.service';
+import { ThemeService } from '../../../core/services/theme.service';
 
 @Component({
   selector: 'app-header',
@@ -17,6 +18,7 @@ import { AuthService } from '../../../core/services/auth.service';
 export class HeaderComponent {
   cartService = inject(CartService);
   authService = inject(AuthService);
+  themeService = inject(ThemeService);
 
   logout(): void {
     this.authService.logout();

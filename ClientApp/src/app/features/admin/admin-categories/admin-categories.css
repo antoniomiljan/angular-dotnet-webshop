@@ -32,3 +32,11 @@
   color: #d32f2f;
   margin-bottom: 16px;
 }
+
+table {
+  min-width: 600px;
+}
+
+.admin-container {
+  overflow-x: auto;
+}

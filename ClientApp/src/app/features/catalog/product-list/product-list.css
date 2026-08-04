@@ -40,3 +40,13 @@
   text-decoration: none;
   font-size: 1.1rem;
 }
+
+@media (max-width: 400px) {
+  .product-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .product-grid-container {
+    padding: 12px;
+  }
+}

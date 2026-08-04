@@ -16,7 +16,22 @@
 }
 
 .user-email {
-  color: white;
+  color: inherit;
   margin-right: 8px;
   font-size: 0.875rem;
+}
+
+@media (max-width: 600px) {
+  .header-toolbar {
+    padding: 0 8px;
+    gap: 4px;
+  }
+
+  .brand {
+    font-size: 1rem;
+  }
+
+  .user-email {
+    display: none;
+  }
 }
