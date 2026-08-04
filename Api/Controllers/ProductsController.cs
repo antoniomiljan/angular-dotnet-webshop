@@ -36,7 +36,10 @@ public class ProductsController : ControllerBase
             query = query.Where(p => p.CategoryId == categoryId.Value);
 
         if (!string.IsNullOrWhiteSpace(search))
-            query = query.Where(p => p.Name.Contains(search));
+        {
+            var normalizedSearch = search.ToLower();
+            query = query.Where(p => p.Name.ToLower().Contains(normalizedSearch));
+        }
 
         var products = await query.ToListAsync();
         return Ok(_mapper.Map<List<ProductDto>>(products));

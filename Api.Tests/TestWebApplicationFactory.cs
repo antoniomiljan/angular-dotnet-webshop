@@ -88,7 +88,7 @@ public class TestWebApplicationFactory : WebApplicationFactory<Program>
     }
 
     public async Task<(Category Category, Product Product)> SeedProductAsync(
-        int stock = 5, decimal price = 10m, bool active = true)
+        int stock = 5, decimal price = 10m, bool active = true, string name = "Test Product")
     {
         using var scope = Services.CreateScope();
         var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
@@ -96,7 +96,7 @@ public class TestWebApplicationFactory : WebApplicationFactory<Program>
         var category = new Category { Name = "Test Category", Slug = Guid.NewGuid().ToString() };
         var product = new Product
         {
-            Name = "Test Product",
+            Name = name,
             Description = "Test product for integration tests",
             Price = price,
             Stock = stock,
