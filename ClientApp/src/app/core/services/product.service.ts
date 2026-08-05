@@ -3,9 +3,10 @@ import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { Product } from '../../shared/models/product.model';
 import { ProductImage } from '../../shared/models/product-image.model';
+import { ProductSpec } from '../../shared/models/product-spec.model';
 import { environment } from '../../../environments/environment';
 
-type ProductPayload = Omit<Product, 'id' | 'categoryName' | 'images'>;
+type ProductPayload = Omit<Product, 'id' | 'categoryName' | 'images' | 'specs'>;
 
 @Injectable({ providedIn: 'root' })
 export class ProductService {
@@ -46,5 +47,21 @@ export class ProductService {
 
   reorderImages(productId: number, imageIds: number[]): Observable<void> {
     return this.http.put<void>(`${this.baseUrl}/${productId}/images/reorder`, { imageIds });
+  }
+
+  addSpec(productId: number, label: string, value: string): Observable<ProductSpec> {
+    return this.http.post<ProductSpec>(`${this.baseUrl}/${productId}/specs`, { label, value });
+  }
+
+  updateSpec(productId: number, specId: number, label: string, value: string): Observable<void> {
+    return this.http.put<void>(`${this.baseUrl}/${productId}/specs/${specId}`, { label, value });
+  }
+
+  removeSpec(productId: number, specId: number): Observable<void> {
+    return this.http.delete<void>(`${this.baseUrl}/${productId}/specs/${specId}`);
+  }
+
+  reorderSpecs(productId: number, specIds: number[]): Observable<void> {
+    return this.http.put<void>(`${this.baseUrl}/${productId}/specs/reorder`, { specIds });
   }
 }

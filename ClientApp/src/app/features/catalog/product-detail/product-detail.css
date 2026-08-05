@@ -80,3 +80,37 @@
 .error {
   color: #d32f2f;
 }
+
+.specs-section {
+  margin-top: 20px;
+}
+
+.specs-section h3 {
+  margin-bottom: 8px;
+}
+
+.specs-list {
+  margin: 0;
+}
+
+.specs-list .spec-row {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 8px 0;
+  border-bottom: 1px solid var(--mat-sys-outline-variant);
+}
+
+.specs-list .spec-row:last-child {
+  border-bottom: none;
+}
+
+.specs-list dt {
+  color: var(--mat-sys-on-surface-variant);
+}
+
+.specs-list dd {
+  margin: 0;
+  font-weight: 500;
+  text-align: right;
+}

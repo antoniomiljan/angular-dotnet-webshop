@@ -114,6 +114,44 @@
   height: 20px;
 }
 
+.spec-manager {
+  margin-bottom: 16px;
+}
+
+.spec-manager h4 {
+  margin: 0 0 8px;
+}
+
+.spec-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+
+.spec-row {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.spec-input {
+  padding: 8px 10px;
+  border: 1px solid var(--mat-sys-outline);
+  border-radius: 4px;
+  background: transparent;
+  color: var(--mat-sys-on-surface);
+  font: inherit;
+}
+
+.spec-label {
+  flex: 1;
+}
+
+.spec-value {
+  flex: 2;
+}
+
 table {
   min-width: 600px;
 }

@@ -15,6 +15,7 @@ import { CategoryService } from '../../../core/services/category.service';
 import { ImageService } from '../../../core/services/image.service';
 import { Product } from '../../../shared/models/product.model';
 import { ProductImage } from '../../../shared/models/product-image.model';
+import { ProductSpec } from '../../../shared/models/product-spec.model';
 import { Category } from '../../../shared/models/category.model';
 import { ResolveImageUrlPipe } from '../../../shared/pipes/resolve-image-url.pipe';
 
@@ -40,10 +41,13 @@ export class AdminProducts implements OnInit {
   error = signal<string | null>(null);
   uploadingImage = signal(false);
 
-  // Images of whichever product is currently open in the edit form. Separate from
-  // `form` because images are managed via their own immediate add/remove/reorder
+  // Images/specs of whichever product is currently open in the edit form. Separate
+  // from `form` because both are managed via their own immediate add/remove/reorder
   // calls, not as part of the Save button's payload.
   currentImages = signal<ProductImage[]>([]);
+  currentSpecs = signal<ProductSpec[]>([]);
+  newSpecLabel = signal('');
+  newSpecValue = signal('');
 
   columns = ['image', 'name', 'price', 'inStock', 'category', 'actions'];
 
@@ -79,6 +83,7 @@ export class AdminProducts implements OnInit {
   startEdit(product: Product): void {
     this.editingId.set(product.id);
     this.currentImages.set(product.images);
+    this.currentSpecs.set(product.specs);
     this.form = {
       name: product.name,
       description: product.description,
@@ -91,12 +96,16 @@ export class AdminProducts implements OnInit {
   startCreate(): void {
     this.editingId.set(-1);
     this.currentImages.set([]);
+    this.currentSpecs.set([]);
     this.form = { name: '', description: '', price: 0, inStock: true, categoryId: this.categories()[0]?.id ?? 0 };
   }
 
   cancelEdit(): void {
     this.editingId.set(null);
     this.currentImages.set([]);
+    this.currentSpecs.set([]);
+    this.newSpecLabel.set('');
+    this.newSpecValue.set('');
     this.error.set(null);
   }
 
@@ -161,6 +170,66 @@ export class AdminProducts implements OnInit {
     });
   }
 
+  addSpec(): void {
+    const productId = this.editingId();
+    const label = this.newSpecLabel().trim();
+    const value = this.newSpecValue().trim();
+    if (!productId || productId === -1 || !label || !value) return;
+
+    this.productService.addSpec(productId, label, value).subscribe({
+      next: (spec) => {
+        this.currentSpecs.update(specs => [...specs, spec]);
+        this.newSpecLabel.set('');
+        this.newSpecValue.set('');
+        this.loadProducts();
+      },
+      error: (err) => this.error.set(err.error ?? 'Failed to add specification.')
+    });
+  }
+
+  updateSpec(spec: ProductSpec, field: 'label' | 'value', text: string): void {
+    const productId = this.editingId();
+    if (!productId || productId === -1) return;
+
+    const updated = { ...spec, [field]: text };
+    this.productService.updateSpec(productId, spec.id, updated.label, updated.value).subscribe({
+      next: () => {
+        this.currentSpecs.update(specs => specs.map(s => (s.id === spec.id ? updated : s)));
+        this.loadProducts();
+      },
+      error: (err) => this.error.set(err.error ?? 'Failed to update specification.')
+    });
+  }
+
+  removeSpec(spec: ProductSpec): void {
+    const productId = this.editingId();
+    if (!productId || productId === -1) return;
+    if (!confirm('Remove this specification?')) return;
+
+    this.productService.removeSpec(productId, spec.id).subscribe({
+      next: () => {
+        this.currentSpecs.update(specs => specs.filter(s => s.id !== spec.id));
+        this.loadProducts();
+      },
+      error: () => this.error.set('Failed to remove specification.')
+    });
+  }
+
+  moveSpec(index: number, direction: -1 | 1): void {
+    const productId = this.editingId();
+    const specs = [...this.currentSpecs()];
+    const newIndex = index + direction;
+    if (!productId || productId === -1 || newIndex < 0 || newIndex >= specs.length) return;
+
+    [specs[index], specs[newIndex]] = [specs[newIndex], specs[index]];
+    this.currentSpecs.set(specs);
+
+    this.productService.reorderSpecs(productId, specs.map(s => s.id)).subscribe({
+      next: () => this.loadProducts(),
+      error: () => this.error.set('Failed to reorder specifications.')
+    });
+  }
+
   save(): void {
     this.error.set(null);
 
@@ -168,9 +237,10 @@ export class AdminProducts implements OnInit {
       this.productService.createProduct(this.form).subscribe({
         next: (created) => {
           // Keeps the form open, now in edit mode for the just-created product,
-          // so images can be added immediately instead of re-opening the form.
+          // so images/specs can be added immediately instead of re-opening the form.
           this.editingId.set(created.id);
           this.currentImages.set(created.images);
+          this.currentSpecs.set(created.specs);
           this.loadProducts();
         },
         error: (err) => this.error.set(err.error ?? 'Failed to create product.')

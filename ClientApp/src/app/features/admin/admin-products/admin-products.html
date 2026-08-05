@@ -79,6 +79,48 @@
         }
       </div>
 
+      <div class="spec-manager">
+        <h4>Specifications</h4>
+
+        @if (editingId() === -1) {
+          <p class="hint">Save the product first, then you can add specs.</p>
+        } @else {
+          <div class="spec-list">
+            @for (spec of currentSpecs(); track spec.id; let i = $index) {
+              <div class="spec-row">
+                <input
+                  class="spec-input spec-label"
+                  [value]="spec.label"
+                  (change)="updateSpec(spec, 'label', $any($event.target).value)"
+                  placeholder="Label"
+                />
+                <input
+                  class="spec-input spec-value"
+                  [value]="spec.value"
+                  (change)="updateSpec(spec, 'value', $any($event.target).value)"
+                  placeholder="Value"
+                />
+                <button mat-icon-button type="button" [disabled]="i === 0" (click)="moveSpec(i, -1)" aria-label="Move up">
+                  <mat-icon>arrow_upward</mat-icon>
+                </button>
+                <button mat-icon-button type="button" [disabled]="i === currentSpecs().length - 1" (click)="moveSpec(i, 1)" aria-label="Move down">
+                  <mat-icon>arrow_downward</mat-icon>
+                </button>
+                <button mat-icon-button type="button" color="warn" (click)="removeSpec(spec)" aria-label="Remove specification">
+                  <mat-icon>delete</mat-icon>
+                </button>
+              </div>
+            }
+          </div>
+
+          <div class="spec-row spec-add-row">
+            <input class="spec-input spec-label" [(ngModel)]="newSpecLabel" placeholder="Label (e.g. Wattage)" />
+            <input class="spec-input spec-value" [(ngModel)]="newSpecValue" placeholder="Value (e.g. 400W)" />
+            <button mat-stroked-button type="button" (click)="addSpec()">Add</button>
+          </div>
+        }
+      </div>
+
       <div class="form-actions">
         <button mat-button (click)="cancelEdit()">Cancel</button>
         <button mat-raised-button color="primary" (click)="save()">Save</button>

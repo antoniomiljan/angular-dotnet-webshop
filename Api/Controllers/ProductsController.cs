@@ -32,6 +32,7 @@ public class ProductsController : ControllerBase
         var query = _context.Products
             .Include(p => p.Category)
             .Include(p => p.Images.OrderBy(i => i.SortOrder))
+            .Include(p => p.Specs.OrderBy(s => s.SortOrder))
             .Where(p => p.IsActive)
             .AsQueryable();
 
@@ -55,6 +56,7 @@ public class ProductsController : ControllerBase
         var product = await _context.Products
             .Include(p => p.Category)
             .Include(p => p.Images.OrderBy(i => i.SortOrder))
+            .Include(p => p.Specs.OrderBy(s => s.SortOrder))
             .FirstOrDefaultAsync(p => p.Id == id && p.IsActive);
 
         if (product is null)
@@ -186,6 +188,90 @@ public class ProductsController : ControllerBase
         {
             var image = images.First(i => i.Id == dto.ImageIds[index]);
             image.SortOrder = index;
+        }
+
+        await _context.SaveChangesAsync();
+
+        return NoContent();
+    }
+
+    // POST: api/products/5/specs
+    [Authorize(Roles = "Admin")]
+    [HttpPost("{id}/specs")]
+    public async Task<ActionResult<ProductSpecDto>> AddSpec(int id, SaveProductSpecDto dto)
+    {
+        var product = await _context.Products
+            .Include(p => p.Specs)
+            .FirstOrDefaultAsync(p => p.Id == id);
+        if (product is null)
+            return NotFound();
+
+        var nextSortOrder = product.Specs.Count == 0 ? 0 : product.Specs.Max(s => s.SortOrder) + 1;
+        var spec = new ProductSpec
+        {
+            Label = dto.Label,
+            Value = dto.Value,
+            SortOrder = nextSortOrder,
+            ProductId = product.Id
+        };
+
+        _context.ProductSpecs.Add(spec);
+        await _context.SaveChangesAsync();
+
+        return Ok(_mapper.Map<ProductSpecDto>(spec));
+    }
+
+    // PUT: api/products/5/specs/10
+    // Unlike images, a spec's text can be corrected in place rather than only
+    // deleted and re-added.
+    [Authorize(Roles = "Admin")]
+    [HttpPut("{id}/specs/{specId}")]
+    public async Task<IActionResult> UpdateSpec(int id, int specId, SaveProductSpecDto dto)
+    {
+        var spec = await _context.ProductSpecs
+            .FirstOrDefaultAsync(s => s.Id == specId && s.ProductId == id);
+        if (spec is null)
+            return NotFound();
+
+        spec.Label = dto.Label;
+        spec.Value = dto.Value;
+        await _context.SaveChangesAsync();
+
+        return NoContent();
+    }
+
+    // DELETE: api/products/5/specs/10
+    [Authorize(Roles = "Admin")]
+    [HttpDelete("{id}/specs/{specId}")]
+    public async Task<IActionResult> RemoveSpec(int id, int specId)
+    {
+        var spec = await _context.ProductSpecs
+            .FirstOrDefaultAsync(s => s.Id == specId && s.ProductId == id);
+        if (spec is null)
+            return NotFound();
+
+        _context.ProductSpecs.Remove(spec);
+        await _context.SaveChangesAsync();
+
+        return NoContent();
+    }
+
+    // PUT: api/products/5/specs/reorder
+    [Authorize(Roles = "Admin")]
+    [HttpPut("{id}/specs/reorder")]
+    public async Task<IActionResult> ReorderSpecs(int id, ReorderProductSpecsDto dto)
+    {
+        var specs = await _context.ProductSpecs
+            .Where(s => s.ProductId == id)
+            .ToListAsync();
+
+        if (dto.SpecIds.Count != specs.Count || !dto.SpecIds.All(specIdToMatch => specs.Any(s => s.Id == specIdToMatch)))
+            return BadRequest("The provided spec ids must exactly match the product's current specs.");
+
+        for (var index = 0; index < dto.SpecIds.Count; index++)
+        {
+            var spec = specs.First(s => s.Id == dto.SpecIds[index]);
+            spec.SortOrder = index;
         }
 
         await _context.SaveChangesAsync();

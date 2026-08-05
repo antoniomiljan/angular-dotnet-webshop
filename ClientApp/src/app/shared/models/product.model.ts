@@ -1,4 +1,5 @@
 import { ProductImage } from './product-image.model';
+import { ProductSpec } from './product-spec.model';
 
 export interface Product {
   id: number;
@@ -7,6 +8,7 @@ export interface Product {
   price: number;
   inStock: boolean;
   images: ProductImage[];
+  specs: ProductSpec[];
   categoryId: number;
   categoryName: string;
 }
