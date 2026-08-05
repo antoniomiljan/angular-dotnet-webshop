@@ -5,12 +5,17 @@ using Microsoft.EntityFrameworkCore;
 using Stripe;
 using System.Text;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.IdentityModel.Tokens;
 using Api.Services;
 
 
 var builder = WebApplication.CreateBuilder(args);
 StripeConfiguration.ApiKey = builder.Configuration["Stripe:SecretKey"];
+
+// Railway (and most container hosts) assign the listen port at runtime via PORT.
+var port = Environment.GetEnvironmentVariable("PORT") ?? "8080";
+builder.WebHost.UseUrls($"http://0.0.0.0:{port}");
 
 builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
@@ -64,10 +69,20 @@ builder.Services.AddCors(options =>
 
 var app = builder.Build();
 
+// Railway terminates TLS at its edge and forwards plain HTTP; without this,
+// UseHttpsRedirection() below sees an http request and redirects, breaking API calls.
+app.UseForwardedHeaders(new ForwardedHeadersOptions
+{
+    ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto
+});
+
 app.UseCors("AllowAngular");
 
 using (var scope = app.Services.CreateScope())
 {
+    var dbContext = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+    await dbContext.Database.MigrateAsync();
+
     var roleManager = scope.ServiceProvider.GetRequiredService<RoleManager<IdentityRole<Guid>>>();
     var userManager = scope.ServiceProvider.GetRequiredService<UserManager<ApplicationUser>>();
 
@@ -92,6 +107,9 @@ app.UseStaticFiles();
 app.UseAuthentication();
 app.UseAuthorization();
 app.MapControllers();
+// Client-side Angular routes (e.g. /product/5) have no matching controller
+// route and no static file, so fall back to the SPA shell.
+app.MapFallbackToFile("index.html");
 
 app.Run();
 
